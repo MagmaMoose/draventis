@@ -239,9 +239,10 @@ dastgate/
 └── tests/                   # mirror modules 1:1 (uploader is unit-tested w/ fakes)
 ```
 
-> **Phase 0 note:** only `automation/`, `charts/dastgate/` (stub), and this doc
-> exist today. `src/dastgate/` is an empty package (version `0.0.0`); the modules
-> above describe the intended shape, not shipped code.
+> **Phase 0 note:** today the repo has `automation/`, `charts/dastgate/` (stub),
+> this doc, and an **empty** `src/dastgate/` package (version `0.0.0`, with a
+> `pyproject.toml` + console-script stub). The modules listed above describe the
+> intended shape, not shipped code.
 
 ### 5.2 Container
 
