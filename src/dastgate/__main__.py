@@ -30,7 +30,9 @@ def _scan_one(
     work_root: str,
     upload: bool = True,
 ) -> ScanOutcome:
-    work_dir = os.path.join(work_root, target.name)
+    # Use only the basename portion of target.name to prevent path traversal
+    # (the targets file comes from OCI Vault, so this is hardening, not a live threat).
+    work_dir = os.path.join(work_root, os.path.basename(target.name))
     try:
         report = run_baseline(target, automation_dir=automation_dir, work_dir=work_dir)
     except Exception as exc:  # per-target isolation — one bad target never aborts the run

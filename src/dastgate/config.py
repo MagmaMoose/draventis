@@ -26,7 +26,12 @@ def load_targets(path: str | Path) -> list[Target]:
             engagement: DAST            # optional
             enabled: true               # optional (default true)
     """
-    data = yaml.safe_load(Path(path).read_text()) or {}
+    try:
+        data = yaml.safe_load(Path(path).read_text()) or {}
+    except yaml.YAMLError as exc:
+        raise OSError(f"invalid YAML in {path}: {exc}") from exc
+    if not isinstance(data, dict):
+        raise OSError(f"targets file {path}: expected a YAML mapping, got {type(data).__name__}")
     raw = data.get("targets") or []
     targets: list[Target] = []
     for entry in raw:

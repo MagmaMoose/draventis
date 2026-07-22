@@ -13,7 +13,7 @@ requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Caleb Sargeant", email = "caleb@magmamoose.com" }]
 keywords = ["security", "dast", "zap", "nuclei", "defectdojo", "sarif"]
-dependencies = ["pyyaml>=6"]
+dependencies = ["pyyaml==6.0.3"]
 
 [project.scripts]
 dastgate = "dastgate.__main__:main"

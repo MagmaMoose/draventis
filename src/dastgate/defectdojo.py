@@ -17,13 +17,14 @@ import json
 import ssl
 import urllib.error
 import urllib.request
+import uuid
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
 
 from dastgate import __version__
 
-_BOUNDARY = "----dastgateDefectDojoBoundary7MA4YWxkTrZu0gW"
+_BOUNDARY_PREFIX = "----dastgateDefectDojoBoundary7MA4YWxkTrZu0gW"
 # Identify ourselves rather than the default "Python-urllib/X.Y", which edge WAFs
 # (e.g. Cloudflare Bot Fight Mode / error 1010) commonly ban by client signature.
 _USER_AGENT = f"dastgate/{__version__} (+https://github.com/MagmaMoose/dastgate)"
@@ -116,7 +117,7 @@ def encode_multipart(
     filename: str,
     file_bytes: bytes,
     content_type: str = "application/xml",
-    boundary: str = _BOUNDARY,
+    boundary: str = _BOUNDARY_PREFIX,
 ) -> bytes:
     """Encode ``fields`` plus one file as a multipart/form-data body."""
     parts: list[bytes] = []
@@ -136,16 +137,18 @@ def encode_multipart(
 
 
 def build_request(config: DefectDojoConfig, report_path: Path) -> urllib.request.Request:
+    boundary = f"{_BOUNDARY_PREFIX}{uuid.uuid4().hex}"
     body = encode_multipart(
         build_form_fields(config),
         file_field="file",
         filename=report_path.name,
         file_bytes=report_path.read_bytes(),
         content_type=config.file_content_type,
+        boundary=boundary,
     )
     request = urllib.request.Request(config.endpoint_url(), data=body, method="POST")
     request.add_header("Authorization", f"Token {config.token}")
-    request.add_header("Content-Type", f"multipart/form-data; boundary={_BOUNDARY}")
+    request.add_header("Content-Type", f"multipart/form-data; boundary={boundary}")
     request.add_header("Accept", "application/json")
     request.add_header("User-Agent", _USER_AGENT)
     return request
