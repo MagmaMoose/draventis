@@ -2,10 +2,10 @@
 
 There are two layers:
 
-1. **`targets.yaml`** - what dastgate itself reads (the scan config). In a
+1. **`targets.yaml`**: what dastgate itself reads (the scan config). In a
    cluster the Helm chart renders it into a ConfigMap and mounts it at
    `/config/targets.yaml`.
-2. **Chart `values.yaml`** - how you configure the Helm release; the chart
+2. **Chart `values.yaml`**: how you configure the Helm release; the chart
    translates the relevant values into `targets.yaml`.
 
 ## `targets.yaml`
@@ -53,7 +53,7 @@ targets:
 | `product` | `name` | DefectDojo product name. |
 | `openapi` | - | Spec URL; seeds the `api` (ZAP) scan. |
 | `tags` | `defaults.tags` | Extra DefectDojo tags. |
-| `auth.type` | `none` | `browser-oidc` is accepted, but the shipped AF plans don't yet drive it - see note below. |
+| `auth.type` | `none` | `browser-oidc` is accepted, but the shipped AF plans don't yet drive it. See the note below. |
 | `auth.user_env` / `auth.pass_env` | `ZAP_USER` / `ZAP_PASS` | Env vars the creds are read from. |
 
 !!! note "Authenticated scanning is not fully wired yet"
@@ -75,7 +75,7 @@ from `targets.yaml` and never from a scanned response:
 | `ZAP_USER` / `ZAP_PASS` | Per the target's `auth.*_env`. |
 
 If `defectdojo.url` is set but `DEFECTDOJO_TOKEN` is empty, uploads are skipped
-(with a warning) - scans still run.
+(with a warning). Scans still run.
 
 ## Chart values → `targets.yaml`
 
@@ -90,7 +90,7 @@ from these values:
 | `targets` | `targets:` |
 
 Secrets are supplied separately (`secret.*` or `externalSecret.*`) and reach the
-container as env vars - see [Deployment](deployment.md). The full annotated
+container as env vars. See [Deployment](deployment.md). The full annotated
 values file is [`charts/dastgate/values.yaml`](https://github.com/MagmaMoose/dastgate/blob/main/charts/dastgate/values.yaml).
 
 ## Scan policies

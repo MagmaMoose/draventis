@@ -30,7 +30,7 @@ targets you configure and uploads results to DefectDojo. Especially relevant:
 - Only point **active** policies (`full`, `api`) at non-production (staging)
   targets. `baseline` is passive and production-safe.
 - Never scan a target you are not authorised to test.
-- Targets and credentials must come only from configuration you control - never
+- Targets and credentials must come only from configuration you control, never
   from a scanned response.
 
 ## Supported versions

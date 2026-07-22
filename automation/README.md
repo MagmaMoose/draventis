@@ -1,6 +1,6 @@
-# automation/ - ZAP Automation Framework plans
+# automation/: ZAP Automation Framework plans
 
-Each file here is a **ZAP Automation Framework (AF) plan** - one declarative YAML
+Each file here is a **ZAP Automation Framework (AF) plan**, one declarative YAML
 that orchestrates the crawl, scan, auth, and report steps. AF replaced the old
 `zap-baseline` / `zap-full-scan` shell entry points and is the standard for every
 dastgate job.
@@ -20,14 +20,14 @@ environment, and runs `zap.sh -cmd -autorun <plan>`.
 The target host is injected as `${DASTGATE_TARGET_URL}`; for authenticated plans,
 `${DASTGATE_LOGIN_URL}`, `${ZAP_USER}` and `${ZAP_PASS}` are populated from the
 environment (a mounted Secret). ZAP substitutes `${VAR}` at plan-load time. Every
-value comes from config you control - never from a scanned response.
+value comes from config you control, never from a scanned response.
 
 ## How results flow to DefectDojo
 
 Every plan ends in a `report` job that writes the **traditional XML** report ZAP's
 DefectDojo parser ingests (e.g. `/zap/wrk/zap-baseline.xml`).
 [`src/dastgate/defectdojo.py`](../src/dastgate/defectdojo.py) then POSTs it to
-**`/api/v2/reimport-scan/`** (stdlib `urllib`, failure-isolated - an upload error
+**`/api/v2/reimport-scan/`** (stdlib `urllib`, failure-isolated: an upload error
 never fails the scan):
 
 ```
@@ -43,13 +43,13 @@ POST /api/v2/reimport-scan/   (multipart/form-data)
 
 **Reimport (not import)** is deliberate: DefectDojo dedupes against the existing
 test, reactivates regressions, and (with `close_old_findings`) mitigates alerts
-that disappeared - giving "what's new / fixed since last scan" without a
+that disappeared, giving "what's new / fixed since last scan" without a
 merge-base diff. See [`../docs/design.md`](../docs/design.md).
 
 ## Customising a plan
 
 - **Exclude destructive routes** via `excludePaths` (logout, delete endpoints).
-- **Suppress engine-level false positives** with an `alertFilter` job - committed
+- **Suppress engine-level false positives** with an `alertFilter` job, committed
   here so it's versioned and reviewable.
 - **Add authentication** with an `authentication` block on the context (browser
   method) plus a `verification` poll strategy so ZAP re-auths on session drop.

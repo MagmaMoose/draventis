@@ -5,7 +5,7 @@ title: "bug: "
 labels: bug
 ---
 
-**Do not report security vulnerabilities here - see [SECURITY.md](../../SECURITY.md).**
+**Do not report security vulnerabilities here. See [SECURITY.md](../../SECURITY.md).**
 
 ## What happened
 

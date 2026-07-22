@@ -41,9 +41,9 @@ targets:
 
 Selection flags:
 
-- `--all` - every target
-- `--target <name>` - one target
-- `--schedule <nightly|weekly>` - only targets on that schedule (this is what the
+- `--all`: every target
+- `--target <name>`: one target
+- `--schedule <nightly|weekly>`: only targets on that schedule (this is what the
   CronJobs use)
 
 Other useful flags: `--config`, `--plans-dir`, `--workdir`, `--no-nuclei`,

@@ -33,7 +33,7 @@ targets:
   - name: app-staging
     url: https://app.staging.example.com
     product: myorg/app
-    policy: full            # active - staging only
+    policy: full            # active, staging only
     schedule: weekly
 schedules:
   weekly:
@@ -48,7 +48,7 @@ helm install dastgate ./charts/dastgate -n security --create-namespace \
 
 !!! warning "Keep secrets out of your values file"
     Pass `secret.defectDojoToken` (and any scan credentials) via `--set`,
-    `--set-file`, `helm secrets`, or an ExternalSecret - never commit them.
+    `--set-file`, `helm secrets`, or an ExternalSecret. Never commit them.
 
 ## What gets created
 
@@ -57,7 +57,7 @@ helm install dastgate ./charts/dastgate -n security --create-namespace \
 | `CronJob` (one per enabled schedule) | Runs `dastgate run --schedule <name>` |
 | `ConfigMap` | The rendered `targets.yaml`, mounted at `/config` |
 | `Secret` *or* `ExternalSecret` | DefectDojo token + scan credentials (`envFrom`) |
-| `ServiceAccount` | No RBAC, token not mounted - dastgate needs no cluster API |
+| `ServiceAccount` | No RBAC, token not mounted; dastgate needs no cluster API |
 
 ## The image
 
@@ -71,10 +71,10 @@ push it and override:
 
 ## Secrets: plain Secret (default) vs External Secrets Operator
 
-**Plain Secret (default)** - works on any cluster, no extra operators. The chart
+**Plain Secret (default)**: works on any cluster, no extra operators. The chart
 creates a `Secret` from `secret.defectDojoToken` and `secret.env`.
 
-**External Secrets Operator** - if you run [ESO](https://external-secrets.io/),
+**External Secrets Operator**: if you run [ESO](https://external-secrets.io/),
 have it materialise the Secret from your store (Vault, AWS/GCP/Azure/OCI, …):
 
 ```yaml
@@ -117,7 +117,7 @@ helm template dastgate ./charts/dastgate -f my-values.yaml \
 
 ## GitOps
 
-The chart is a plain Helm chart - reference it from Argo CD, Flux
+The chart is a plain Helm chart. Reference it from Argo CD, Flux
 `HelmRelease`, or `helm install` in CI. Nothing in the chart assumes a specific
 GitOps controller.
 
@@ -127,5 +127,5 @@ GitOps controller.
   piling up or running forever.
 - Heavy active scans can be pinned to specific nodes via `nodeSelector` /
   `tolerations` / `affinity`.
-- An upload failure never fails the scan - check CronJob logs for
+- An upload failure never fails the scan. Check CronJob logs for
   `[dastgate] upload failed (non-fatal)`.
