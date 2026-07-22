@@ -33,12 +33,17 @@ jobs:
     steps:
       - uses: magmamoose/chargate@eaac494291b73dd9586875ba8aaed658ca24eb6c # v2.8.0
         with:
-          # Gate on net-new medium+ (default is `any`). This repo ships a Helm
-          # chart, and KICS emits a floor of low/none structural findings on any
-          # chart (no LimitRange/ResourceQuota, image ref user-configurable so no
-          # digest, etc.) that aren't fixable in a distributable app chart. Real
-          # medium/high/critical issues still block.
-          fail_on: medium
+          # Gate on net-new high+ (default is `any`). This repo ships a Helm
+          # chart scanned by KICS, which emits findings that can't be satisfied
+          # for a scanner built on the ZAP base image or resolved in a
+          # distributable app chart:
+          #   - the sole medium (runAsUser) demands UID >= 10000, but the ZAP
+          #     base image owns its files as uid 1000, so a high UID breaks it;
+          #   - a floor of low/none structural findings (no LimitRange/
+          #     ResourceQuota, user-configurable image ref so no digest, envFrom
+          #     secrets, ZAP's writable-rootfs need).
+          # Real high/critical issues still block.
+          fail_on: high
           defectdojo_url: ${{ vars.MM_DEFECTDOJO_URL }}
           defectdojo_token: ${{ secrets.MM_DEFECTDOJO_API_KEY }}
           dependency_track_url: ${{ vars.MM_DEPENDENCY_TRACK_URL }}
