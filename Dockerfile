@@ -8,6 +8,11 @@
 #   docker run --rm -e DEFECTDOJO_URL=... -e DEFECTDOJO_TOKEN=... \
 #     -v "$PWD/targets.yaml:/config/targets.yaml:ro" \
 #     dastgate:local run --all --config /config/targets.yaml
+# No HEALTHCHECK: this is a batch/CronJob image (runs `dastgate run` to
+# completion), not a long-running service. Kubernetes ignores Docker HEALTHCHECK
+# and tracks the Job's exit status instead, so a healthcheck would be meaningless.
+# kics-scan disable=b03a748a-542d-44f4-bb86-9199ab4fd2d5
+
 # Pinned by digest for reproducible, verifiable builds (this is the multi-arch
 # manifest list for the :stable tag; buildx still selects the right arch).
 FROM ghcr.io/zaproxy/zaproxy:stable@sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2
@@ -34,7 +39,13 @@ RUN set -eux; \
 # Install the dastgate package.
 COPY pyproject.toml README.md /src/
 COPY src /src/src
-RUN python3 -m pip install --no-cache-dir --break-system-packages /src && rm -rf /src
+# The root build steps above (pip, `nuclei -version`) run with HOME=/home/zap and
+# leave root-owned dotdirs there (e.g. /home/zap/.config), which would stop uid
+# 1000 from writing its config at runtime (Nuclei's config dir). Hand the home
+# back to uid 1000.
+RUN python3 -m pip install --no-cache-dir --break-system-packages /src \
+    && rm -rf /src \
+    && chown -R 1000:1000 /home/zap
 
 # Ship the ZAP Automation Framework plans dastgate renders per target.
 COPY automation /automation

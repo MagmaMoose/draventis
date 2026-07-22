@@ -145,8 +145,11 @@ resources:
   requests:
     cpu: "500m"
     memory: "1Gi"
-  # No limits by default — scan pods are bursty; add limits if your cluster
-  # requires them.
+  limits:
+    # Generous memory ceiling so a runaway scan can't pressure the node. No CPU
+    # limit — scans are bursty and CPU throttling only slows them. Raise for
+    # large active scans.
+    memory: "4Gi"
 
 nodeSelector: {}
 tolerations: []
