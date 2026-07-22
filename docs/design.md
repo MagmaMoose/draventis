@@ -9,7 +9,7 @@ for that).
 - **ZAP is the primary engine, Nuclei the complement.** ZAP (via the Automation
   Framework) is the deep, stateful, authenticated crawler + active scanner.
   Nuclei is the fast, low-false-positive templated layer (known CVEs, exposures,
-  misconfig) with optional `-dast` fuzzing. Both are FOSS and — critically —
+  misconfig) with optional `-dast` fuzzing. Both are FOSS and, critically,
   **both have first-class DefectDojo parsers** (`ZAP Scan` XML, `Nuclei Scan`
   JSON).
 - **DAST runs as a scheduled CronJob**, not in CI on a PR, because DAST needs a
@@ -59,9 +59,9 @@ entry points. dastgate ships one plan per policy in [`automation/`](https://gith
 
 | Plan | Jobs | dastgate policy |
 |---|---|---|
-| `zap-baseline.yaml` | spider + passive | `baseline` — nightly, prod-safe |
-| `full-active.yaml` | + ajax-spider + active | `full` — weekly, staging only |
-| `api-scan.yaml` | OpenAPI import → spider → active | `api` — services with a spec |
+| `zap-baseline.yaml` | spider + passive | `baseline`: nightly, prod-safe |
+| `full-active.yaml` | + ajax-spider + active | `full`: weekly, staging only |
+| `api-scan.yaml` | OpenAPI import → spider → active | `api`: services with a spec |
 
 ## DefectDojo ingestion
 
@@ -72,7 +72,7 @@ with:
 - `product_name` + `engagement_name` + `auto_create_context=true`
   → DefectDojo auto-creates the product/engagement/test on first run (no
   pre-provisioning).
-- `test_title` — a stable dedupe key across runs.
+- `test_title`: a stable dedupe key across runs.
 - `close_old_findings=true` → fixed alerts auto-mitigate per engagement.
 - `tags`, optional `product_type_name`.
 
@@ -81,7 +81,7 @@ with:
 Reimport compares the incoming report to the existing test and **won't create
 duplicates**; it reactivates regressions and, with `close_old_findings`,
 mitigates alerts that disappeared. That yields "what's new / fixed since last
-scan" *for free* — the drift signal DAST needs — without a merge-base diff.
+scan" *for free* (the drift signal DAST needs), without a merge-base diff.
 
 ### Engagement/test modeling
 
@@ -98,13 +98,13 @@ risk-accept there once, and reimport dedupe preserves that state across runs.
 ## Where DAST runs
 
 DAST needs a running target. The default placement is a **scheduled CronJob
-against already-deployed environments** — the cluster already runs everything, it
+against already-deployed environments**: the cluster already runs everything, it
 fits a secrets-from-a-store idiom, and it decouples slow/destructive active scans
 from PR latency.
 
-- **Nightly** — ZAP baseline (passive) on prod-facing + staging hosts, plus
+- **Nightly**: ZAP baseline (passive) on prod-facing + staging hosts, plus
   Nuclei templated/known-CVE (non-destructive).
-- **Weekly** — ZAP full active + Nuclei `-dast` fuzzing against **staging only**.
+- **Weekly**: ZAP full active + Nuclei `-dast` fuzzing against **staging only**.
 
 An **optional per-PR ephemeral-env scan** (spin the app up in CI, scan, gate) is
 worth it only when a service ships an OpenAPI spec and you want API-contract DAST
@@ -116,32 +116,32 @@ cost.
 
 Most apps behind an OIDC proxy need dastgate to authenticate. Do both:
 
-1. **Scan behind the proxy** (app-layer bugs) — ZAP Browser-Based Authentication
+1. **Scan behind the proxy** (app-layer bugs): ZAP Browser-Based Authentication
    drives the real OIDC login in a headless browser and uses a poll-based
    verification strategy to re-authenticate when the session drops. Give your
    identity provider a dedicated low-privilege scan user.
-2. **Scan the origin directly** (the app's own attack surface) — in-cluster, hit
+2. **Scan the origin directly** (the app's own attack surface): in-cluster, hit
    the Service directly, bypassing the proxy. This tests the app as if the proxy
-   were removed — valuable, since a misconfigured route would strip your only
+   were removed. That's valuable, since a misconfigured route would strip your only
    authn layer.
 
 **Status:** the config model and credential plumbing exist, but the shipped AF
-plans don't yet include an `authentication` block — adding it to a plan is
+plans don't yet include an `authentication` block. Adding it to a plan is
 currently a per-target step.
 
 **Safety:** targets and credentials come **only** from config you control, never
 from a scanned response. Active scans hit staging, never production.
 
-## Net-new philosophy — baseline, not diff-gated
+## Net-new philosophy: baseline, not diff-gated
 
 DAST is baseline-only, deliberately **not** a merge-base diff gate:
 
-- **No merge-base to diff against** — DAST runs against a deployed environment,
+- **No merge-base to diff against**: DAST runs against a deployed environment,
   not a PR's changed lines. There is no `git diff` for "this response header
   regressed."
-- **DAST is non-deterministic** — crawler coverage, timing, and active-scan
+- **DAST is non-deterministic**: crawler coverage, timing, and active-scan
   payload success vary run to run; a naive "new since last run" gate would flap.
-- **DefectDojo already gives the safe version of net-new** — reimport dedupe +
+- **DefectDojo already gives the safe version of net-new**: reimport dedupe +
   `close_old_findings` yields reactivated (regressed) and new finding states
   without a merge-base. Pair that with SLA tracking so new Highs get a clock.
 
@@ -155,7 +155,7 @@ The image builds on the official ZAP image (ZAP + JRE + headless browsers for
 browser-based auth) plus the Nuclei binary and the `dastgate` package. It runs
 **non-root** with `seccompProfile: RuntimeDefault` and all capabilities dropped;
 only `/zap/wrk` (an `emptyDir`) is writable. dastgate needs **no Kubernetes API
-access** — it only makes HTTP requests to targets and DefectDojo — so its
+access** (it only makes HTTP requests to targets and DefectDojo), so its
 ServiceAccount has no RBAC and does not mount a token: a deliberately minimal
 blast radius.
 
@@ -163,10 +163,10 @@ blast radius.
 
 A safe way to adopt dastgate incrementally:
 
-- **Crawl** — one nightly `baseline` target against a safe host; prove the ZAP
+- **Crawl**: one nightly `baseline` target against a safe host; prove the ZAP
   reimport pipe lands in DefectDojo with `auto_create_context`.
-- **Walk** — enable Nuclei; wire browser-based OIDC auth for one staging app; add
+- **Walk**: enable Nuclei; wire browser-based OIDC auth for one staging app; add
   the weekly full-active CronJob against staging only.
-- **Run** — expand `targets.yaml` to all apps (passive prod / active staging);
+- **Run**: expand `targets.yaml` to all apps (passive prod / active staging);
   add `openapi` + Nuclei `-dast` API scanning and Schemathesis for spec'd
   services.

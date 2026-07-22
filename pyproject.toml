@@ -59,3 +59,16 @@ select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
 testpaths = ["tests"]
 pythonpath = ["src"]
 addopts = "-ra"
+
+# Release versioning (python-semantic-release, driven by the Diatreme release
+# workflow). The presence of this table also selects the semantic-release-python
+# versioning tool. The version is derived from Conventional Commit history and
+# written to pyproject, the package __version__, and the chart appVersion.
+[tool.semantic_release]
+version_toml = ["pyproject.toml:project.version"]
+version_variables = [
+    "src/dastgate/__init__.py:__version__",
+    "charts/dastgate/Chart.yaml:appVersion",
+]
+allow_zero_version = true  # stay on 0.x (project is alpha); first release is 0.1.0
+major_on_zero = false      # breaking changes stay on 0.x until we're ready for 1.0

@@ -44,7 +44,7 @@ between the repo and what's actually deployed. See [Design](design.md).
 The orchestration, config model, DefectDojo uploader, ZAP/Nuclei command
 building, Helm chart, and container image are implemented and unit-tested.
 Validate the end-to-end scan path against your own environment before relying on
-it — start with a single `baseline` target against a safe host.
+it. Start with a single `baseline` target against a safe host.
 
 ## License
 

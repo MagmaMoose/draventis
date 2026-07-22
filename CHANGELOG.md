@@ -6,9 +6,9 @@ to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
-## [0.1.0] — 2026-07-22
+## [0.1.0] - 2026-07-22
 
-First working release — dastgate moves out of the Phase 0 scaffold into a real,
+First working release: dastgate moves out of the Phase 0 scaffold into a real,
 generic, deploy-anywhere project.
 
 ### Added

@@ -1,4 +1,4 @@
-# Session — <title> (<date>)
+# Session: <title> (<date>)
 
 ## What we did
 -

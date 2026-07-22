@@ -29,7 +29,7 @@ not stop the rest.
 | [`zap.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/zap.py) | Pick the AF plan for a policy, export `${DASTGATE_*}` env, build & run `zap.sh`, return the report path. | stdlib only |
 | [`nuclei.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/nuclei.py) | Build & run the `nuclei` command (JSONL output; `-dast` for non-baseline). | stdlib only |
 | [`defectdojo.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/defectdojo.py) | `reimport-scan` client: build multipart, POST via `urllib`, **failure-isolated**. | stdlib only |
-| [`__main__.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/__main__.py) | The `dastgate run` CLI: parse args, select targets, orchestrate scan + upload. | — |
+| [`__main__.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/__main__.py) | The `dastgate run` CLI: parse args, select targets, orchestrate scan + upload. | None |
 
 ### Design properties
 
@@ -73,7 +73,7 @@ from the environment at plan-load time (`${DASTGATE_TARGET_URL}`, `${ZAP_USER}`,
 Renders `targets.yaml` into a ConfigMap, provisions the secret backend (plain
 Secret or ExternalSecret), and creates a CronJob per enabled schedule. See
 [Deployment](deployment.md). The chart-rendered `targets.yaml` is the exact shape
-`config.load_config` parses — the two are kept in sync.
+`config.load_config` parses. The two are kept in sync.
 
 ## Testing
 

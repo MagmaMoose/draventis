@@ -4,7 +4,7 @@ Scheduled DAST for Kubernetes: a Python CLI runs OWASP ZAP (Automation Framework
 and Nuclei against already-deployed targets and reimports the reports into
 DefectDojo. It ships as a generic Helm chart (a CronJob per schedule) and a
 container image bundling the scanners. dastgate is the **orchestrator + uploader**;
-the scanners are the engines. This is a **generic, public** project — no
+the scanners are the engines. This is a **generic, public** project: no
 org-specific hosts, secret stores, or infra in defaults.
 
 ## Commands
