@@ -27,19 +27,19 @@ helm install dastgate ./charts/dastgate \
 ## Why DAST
 
 Static analysis (SAST/SCA/IaC/secrets) reasons about **source and artifacts at
-rest** — it never sends an HTTP request to a running instance. DAST closes the
+rest** - it never sends an HTTP request to a running instance. DAST closes the
 "does the deployed thing actually behave insecurely?" gap:
 
-- **AuthN / session** — cookie flags, session fixation, IDOR across users.
-- **Injection reachable at runtime** — confirmed SQLi/XSS with a working payload.
-- **Response headers / TLS / cookies** — the actual `CSP`, `HSTS`, `Secure`/
+- **AuthN / session** - cookie flags, session fixation, IDOR across users.
+- **Injection reachable at runtime** - confirmed SQLi/XSS with a working payload.
+- **Response headers / TLS / cookies** - the actual `CSP`, `HSTS`, `Secure`/
   `HttpOnly`/`SameSite` your ingress and app emit at runtime.
 - **CORS misconfiguration**, **SSRF/OOB**, live **API surface** from an OpenAPI
   spec, and **config drift** between the repo and what's actually deployed.
 
 ## How it works
 
-dastgate is an **orchestrator + uploader** — the scanner is the engine, dastgate
+dastgate is an **orchestrator + uploader** - the scanner is the engine, dastgate
 schedules it and ships the results:
 
 ```
@@ -52,10 +52,10 @@ CronJob (nightly / weekly)
 ```
 
 - Runs as one or more **Kubernetes CronJobs**, because DAST needs a *running
-  target* — your cluster already runs your apps.
+  target* - your cluster already runs your apps.
 - The DefectDojo client is **stdlib `urllib` and failure-isolated**: an upload
   error is logged and never fails the scan.
-- **Reimport, not import** — DefectDojo dedupes against the existing test,
+- **Reimport, not import** - DefectDojo dedupes against the existing test,
   reactivates regressions, and (with `close_old_findings`) mitigates alerts that
   disappeared, giving "what's new / fixed since last scan" without a merge-base
   diff. See [`docs/design.md`](docs/design.md) for why DAST is baseline-only, not
@@ -89,7 +89,7 @@ targets:
   - name: app-staging
     url: https://app.staging.example.com
     product: example/app      # DefectDojo product name
-    policy: full              # active scan — staging only
+    policy: full              # active scan - staging only
     schedule: weekly
     openapi: https://app.staging.example.com/openapi.json
     auth:
@@ -99,7 +99,7 @@ targets:
       pass_env: ZAP_PASS
 ```
 
-Secrets (the DefectDojo token, scan credentials) come from the environment —
+Secrets (the DefectDojo token, scan credentials) come from the environment -
 either a plain Kubernetes Secret (default) or
 [External Secrets Operator](https://external-secrets.io/) (optional). They are
 **never** read from a scanned response. Full reference:
@@ -110,14 +110,14 @@ either a plain Kubernetes Secret (default) or
 Apps behind an OIDC proxy need dastgate to authenticate. The config model accepts
 per-target `auth` (and dastgate exports the login URL + credentials into the
 scan environment), but **the shipped AF plans do not yet include an
-`authentication` block** — wiring it in is a per-target step you add to the plan
+`authentication` block** - wiring it in is a per-target step you add to the plan
 today. Two complementary approaches (see [`docs/design.md`](docs/design.md)):
 
-1. **Behind the proxy** — ZAP Browser-Based Authentication can drive the real
+1. **Behind the proxy** - ZAP Browser-Based Authentication can drive the real
    OIDC login headlessly and re-authenticate when the session drops, once you add
    an `authentication` (browser) + `verification` block to the plan. Use a
    dedicated low-privilege scan user.
-2. **Origin directly** — scan the in-cluster Service, bypassing the proxy, to
+2. **Origin directly** - scan the in-cluster Service, bypassing the proxy, to
    test the app as if the proxy were removed (defense-in-depth).
 
 ## Run it locally
@@ -148,11 +148,11 @@ single `baseline` target against a safe host.
 Full docs (MkDocs): `pip install mkdocs-material && mkdocs serve`, or just read
 [`docs/`](docs/).
 
-- [Setup](docs/setup.md) — local dev, building the image
-- [Deployment](docs/deployment.md) — Helm on any cluster
-- [Configuration](docs/configuration.md) — `targets.yaml` + chart values
-- [Architecture](docs/architecture.md) — module map + data flow
-- [Design](docs/design.md) — tool choice, DefectDojo semantics, rationale
+- [Setup](docs/setup.md) - local dev, building the image
+- [Deployment](docs/deployment.md) - Helm on any cluster
+- [Configuration](docs/configuration.md) - `targets.yaml` + chart values
+- [Architecture](docs/architecture.md) - module map + data flow
+- [Design](docs/design.md) - tool choice, DefectDojo semantics, rationale
 
 ## Conventions
 
@@ -161,4 +161,4 @@ dependency (a YAML parser); the scan engines run as pinned binaries in the image
 
 ## License
 
-MIT — see [`LICENSE`](LICENSE).
+MIT - see [`LICENSE`](LICENSE).

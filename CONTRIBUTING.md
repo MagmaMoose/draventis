@@ -33,7 +33,7 @@ See [`docs/setup.md`](docs/setup.md) for the full local workflow and
 
 ## Reporting security issues
 
-Please follow [`SECURITY.md`](SECURITY.md) — do not open a public issue for
+Please follow [`SECURITY.md`](SECURITY.md) - do not open a public issue for
 vulnerabilities.
 
 ## License
