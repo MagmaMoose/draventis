@@ -1,0 +1,51 @@
+# dastgate — Phase 0 scaffold.
+#
+# This is a *seed* project file. The package under `src/dastgate/` is an empty,
+# version 0.0.0 shell (no working code yet). The scripts entry and tooling config
+# below describe the *intended* shape from docs/DESIGN.md (§5.1) so later phases have
+# a real base to build against — they do not imply the tool exists yet. See
+# "Status: Planning (Phase 0)" in README.md.
+[project]
+name = "dastgate"
+version = "0.0.0"
+description = "Scheduled DAST (OWASP ZAP + Nuclei) against deployed environments, reimported into DefectDojo."
+readme = "README.md"
+requires-python = ">=3.11"
+license = "MIT"
+authors = [{ name = "Caleb Sargeant", email = "caleb@magmamoose.com" }]
+keywords = ["security", "dast", "zap", "nuclei", "defectdojo", "sarif"]
+# Intended to mirror chargate's uploader ethos: a stdlib-`urllib` DefectDojo client
+# (no runtime deps in the core). The scan engines (ZAP, Nuclei) run as pinned
+# binaries in the container, not as Python deps. A YAML parser for `targets.yaml`
+# is the one likely runtime dep to be pinned when config.py lands (see DESIGN §5.3).
+dependencies = []
+
+[project.scripts]
+dastgate = "dastgate.__main__:main"
+
+[project.urls]
+Homepage = "https://github.com/MagmaMoose/dastgate"
+Source = "https://github.com/MagmaMoose/dastgate"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/dastgate"]
+
+[dependency-groups]
+dev = ["pytest>=8", "ruff>=0.6"]
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+src = ["src", "tests"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP", "B", "SIM", "RUF"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+addopts = "-ra"

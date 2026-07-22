@@ -1,0 +1,28 @@
+apiVersion: v2
+name: dastgate
+description: >-
+  Scheduled DAST (OWASP ZAP by Checkmarx via the Automation Framework + Nuclei)
+  against deployed/staging environments, reimported into DefectDojo. Phase 0
+  scaffold — stub chart, not yet deployable.
+type: application
+
+# Phase 0 scaffold: the chart is a stub. `version` is the chart version;
+# `appVersion` is pinned to 0.0.0 until the dastgate image ships a real release.
+version: 0.1.0
+appVersion: "0.0.0"
+
+keywords:
+  - dast
+  - security
+  - zap
+  - nuclei
+  - defectdojo
+  - cronjob
+
+home: https://github.com/MagmaMoose/dastgate
+sources:
+  - https://github.com/MagmaMoose/dastgate
+
+maintainers:
+  - name: Caleb Sargeant
+    email: caleb@magmamoose.com

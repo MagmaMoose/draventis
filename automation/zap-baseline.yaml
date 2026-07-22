@@ -1,0 +1,60 @@
+# ---------------------------------------------------------------------------
+# EXAMPLE — ZAP Automation Framework plan: passive baseline scan.
+#
+# Phase 0 scaffold. This is an illustrative, valid AF plan skeleton, NOT a
+# wired-up job. Nothing in this repo renders or runs it yet — see
+# ../docs/DESIGN.md (§5.4) for how zap.py will template per-target plans.
+#
+# Passive baseline = spider + passive rules only. NO active attacks and NO
+# ajax-spider, so it is safe/non-destructive to run against prod-facing hosts.
+# The target comes from the DASTGATE_TARGET_URL environment variable (ZAP AF
+# substitutes ${VAR} at plan-load time). Targets and credentials MUST come only
+# from OCI Vault config we control — never from a scanned response.
+#
+# Run (once the container exists):
+#   zap.sh -cmd -autorun /path/to/zap-baseline.yaml
+# Produces /zap/wrk/zap-baseline.xml → reimport into DefectDojo as "ZAP Scan".
+# ---------------------------------------------------------------------------
+
+env:
+  contexts:
+    - name: baseline-target
+      urls:
+        - "${DASTGATE_TARGET_URL}"
+      includePaths:
+        - "${DASTGATE_TARGET_URL}.*"
+      excludePaths:
+        - ".*/logout.*"
+        - ".*/admin/delete.*"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # Configure the passive scanner (all passive rules on).
+  - type: passiveScan-config
+    parameters:
+      enableTags: false
+      scanOnlyInScope: true
+
+  # Crawl the site to seed the tree (traditional spider only — no ajaxSpider,
+  # so this stays passive and non-destructive).
+  - type: spider
+    parameters:
+      context: baseline-target
+      maxDuration: 5
+      maxDepth: 10
+      maxChildren: 0
+
+  # Let passive scanning drain its queue before reporting.
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 10
+
+  # Emit the traditional XML report DefectDojo's "ZAP Scan" parser ingests.
+  - type: report
+    parameters:
+      template: traditional-xml
+      reportDir: /zap/wrk
+      reportFile: zap-baseline.xml

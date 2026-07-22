@@ -1,0 +1,47 @@
+# --- Python ---
+__pycache__/
+*.py[cod]
+*.egg-info/
+.eggs/
+build/
+dist/
+.venv/
+venv/
+.uv/
+.ruff_cache/
+.pytest_cache/
+.mypy_cache/
+.coverage
+htmlcov/
+
+# --- ZAP / scan output & report artifacts ---
+# ZAP Automation Framework work dir + reports
+/zap/wrk/
+wrk/
+zap.xml
+zap-report.*
+zap_*.xml
+*.zap
+# Nuclei / generic scan report artifacts
+nuclei-*.json
+nuclei-*.jsonl
+*-report.json
+*-report.xml
+# Any JSON/XML/SARIF report artifacts produced by a scan run
+*.sarif
+reports/
+scan-output/
+output/
+
+# --- Secrets / local env ---
+.env
+.env.*
+!.env.example
+*.local.yaml
+targets.local.yaml
+secrets/
+
+# --- Editors / OS ---
+.idea/
+.vscode/
+.DS_Store
