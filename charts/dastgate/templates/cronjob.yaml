@@ -1,0 +1,85 @@
+{{- /*
+One CronJob per enabled schedule (nightly, weekly). Each runs
+`dastgate run --schedule <name>`, which scans only the targets whose schedule
+matches. concurrencyPolicy Forbid + activeDeadlineSeconds stop a hung scan from
+piling up or running forever.
+*/ -}}
+{{- range $sched, $cfg := .Values.schedules }}
+{{- if $cfg.enabled }}
+---
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "dastgate.fullname" $ }}-{{ $sched }}
+  labels:
+    {{- include "dastgate.labels" $ | nindent 4 }}
+    dastgate.io/schedule: {{ $sched }}
+spec:
+  schedule: {{ $cfg.cron | quote }}
+  concurrencyPolicy: {{ $.Values.concurrencyPolicy }}
+  successfulJobsHistoryLimit: {{ $.Values.successfulJobsHistoryLimit }}
+  failedJobsHistoryLimit: {{ $.Values.failedJobsHistoryLimit }}
+  jobTemplate:
+    spec:
+      activeDeadlineSeconds: {{ $cfg.activeDeadlineSeconds }}
+      backoffLimit: 0
+      template:
+        metadata:
+          labels:
+            {{- include "dastgate.selectorLabels" $ | nindent 12 }}
+            dastgate.io/schedule: {{ $sched }}
+        spec:
+          restartPolicy: Never
+          serviceAccountName: {{ include "dastgate.serviceAccountName" $ }}
+          automountServiceAccountToken: false
+          {{- with $.Values.image.pullSecrets }}
+          imagePullSecrets:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext:
+            {{- toYaml $.Values.podSecurityContext | nindent 12 }}
+          {{- with $.Values.nodeSelector }}
+          nodeSelector:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.tolerations }}
+          tolerations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          {{- with $.Values.affinity }}
+          affinity:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
+          volumes:
+            - name: config
+              configMap:
+                name: {{ include "dastgate.fullname" $ }}-config
+            - name: workdir
+              emptyDir: {}
+          containers:
+            - name: dastgate
+              image: {{ include "dastgate.image" $ | quote }}
+              imagePullPolicy: {{ $.Values.image.pullPolicy }}
+              args:
+                - run
+                - --schedule
+                - {{ $sched }}
+                - --config
+                - /config/targets.yaml
+                - --plans-dir
+                - /automation
+              envFrom:
+                - secretRef:
+                    name: {{ include "dastgate.secretName" $ }}
+              securityContext:
+                {{- toYaml $.Values.securityContext | nindent 16 }}
+              resources:
+                {{- toYaml $.Values.resources | nindent 16 }}
+              volumeMounts:
+                - name: config
+                  mountPath: /config
+                  readOnly: true
+                - name: workdir
+                  mountPath: /zap/wrk
+{{- end }}
+{{- end }}

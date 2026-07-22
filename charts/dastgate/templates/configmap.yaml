@@ -1,0 +1,33 @@
+{{- /*
+Render targets.yaml (the non-secret scan config) into a ConfigMap the CronJobs
+mount at /config/targets.yaml. Secrets (DefectDojo token, scan credentials) are
+NOT here — they come from the Secret / ExternalSecret via envFrom.
+*/ -}}
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "dastgate.fullname" . }}-config
+  labels:
+    {{- include "dastgate.labels" . | nindent 4 }}
+data:
+  targets.yaml: |
+    {{- with .Values.defaults }}
+    defaults:
+      {{- toYaml . | nindent 6 }}
+    {{- end }}
+    defectdojo:
+      {{- if .Values.defectDojo.url }}
+      url: {{ .Values.defectDojo.url | quote }}
+      {{- end }}
+      {{- with .Values.defectDojo.productType }}
+      product_type: {{ . | quote }}
+      {{- end }}
+      engagement_prefix: {{ .Values.defectDojo.engagementPrefix | quote }}
+      auto_create_context: {{ .Values.defectDojo.autoCreateContext }}
+      close_old_findings: {{ .Values.defectDojo.closeOldFindings }}
+      tags:
+        {{- toYaml .Values.defectDojo.tags | nindent 8 }}
+    nuclei:
+      enabled: {{ .Values.nuclei.enabled }}
+    targets:
+      {{- toYaml .Values.targets | nindent 6 }}

@@ -1,0 +1,57 @@
+# ---------------------------------------------------------------------------
+# ZAP Automation Framework plan: OpenAPI-driven API scan.
+#
+# Imports an OpenAPI/Swagger spec to seed the site tree, then spiders and ACTIVE
+# scans the described operations. Active, so staging only.
+#
+# ${DASTGATE_TARGET_URL} is the API base URL; ${DASTGATE_OPENAPI_URL} is the spec
+# location (both populated from config / the environment).
+#
+# Run:  zap.sh -cmd -autorun /path/to/api-scan.yaml
+# Produces /zap/wrk/zap-api.xml -> reimport into DefectDojo as "ZAP Scan".
+# ---------------------------------------------------------------------------
+
+env:
+  contexts:
+    - name: api-target
+      urls:
+        - "${DASTGATE_TARGET_URL}"
+      includePaths:
+        - "${DASTGATE_TARGET_URL}.*"
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  # Import the spec -> seed the site tree with every documented operation.
+  - type: openapi
+    parameters:
+      apiUrl: "${DASTGATE_OPENAPI_URL}"
+      targetUrl: "${DASTGATE_TARGET_URL}"
+      context: api-target
+
+  - type: passiveScan-config
+    parameters:
+      enableTags: false
+      scanOnlyInScope: true
+
+  - type: spider
+    parameters:
+      context: api-target
+      maxDuration: 5
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 10
+
+  - type: activeScan
+    parameters:
+      context: api-target
+      maxScanDurationInMins: 60
+
+  - type: report
+    parameters:
+      template: traditional-xml
+      reportDir: /zap/wrk
+      reportFile: zap-api.xml

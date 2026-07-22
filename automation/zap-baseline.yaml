@@ -1,19 +1,16 @@
 # ---------------------------------------------------------------------------
-# EXAMPLE — ZAP Automation Framework plan: passive baseline scan.
+# ZAP Automation Framework plan: passive baseline scan.
 #
-# Phase 0 scaffold. This is an illustrative, valid AF plan skeleton, NOT a
-# wired-up job. Nothing in this repo renders or runs it yet — see
-# ../docs/DESIGN.md (§5.4) for how zap.py will template per-target plans.
+# This is the plan `dastgate` runs for a target whose policy is `baseline`.
 #
 # Passive baseline = spider + passive rules only. NO active attacks and NO
-# ajax-spider, so it is safe/non-destructive to run against prod-facing hosts.
+# ajax-spider, so it is safe/non-destructive to run against production hosts.
 # The target comes from the DASTGATE_TARGET_URL environment variable (ZAP AF
 # substitutes ${VAR} at plan-load time). Targets and credentials MUST come only
-# from OCI Vault config we control — never from a scanned response.
+# from config you control — never from a scanned response.
 #
-# Run (once the container exists):
-#   zap.sh -cmd -autorun /path/to/zap-baseline.yaml
-# Produces /zap/wrk/zap-baseline.xml → reimport into DefectDojo as "ZAP Scan".
+# Run:  zap.sh -cmd -autorun /path/to/zap-baseline.yaml
+# Produces /zap/wrk/zap-baseline.xml -> reimport into DefectDojo as "ZAP Scan".
 # ---------------------------------------------------------------------------
 
 env:

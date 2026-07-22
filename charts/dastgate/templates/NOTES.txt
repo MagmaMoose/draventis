@@ -1,0 +1,31 @@
+dastgate {{ .Chart.AppVersion }} installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+
+Scheduled scans:
+{{- range $sched, $cfg := .Values.schedules }}
+{{- if $cfg.enabled }}
+  - {{ include "dastgate.fullname" $ }}-{{ $sched }}  (schedule: "{{ $cfg.cron }}")
+{{- end }}
+{{- end }}
+
+Targets configured: {{ len .Values.targets }}
+DefectDojo sink:    {{ if .Values.defectDojo.url }}{{ .Values.defectDojo.url }}{{ else }}DISABLED (set defectDojo.url to enable uploads){{ end }}
+Secrets backend:    {{ if .Values.externalSecret.enabled }}ExternalSecret ({{ .Values.externalSecret.secretStoreRef.name }}){{ else }}plain Secret{{ end }}
+Nuclei:             {{ if .Values.nuclei.enabled }}enabled{{ else }}disabled{{ end }}
+
+Trigger a scan now (instead of waiting for the schedule):
+
+  kubectl -n {{ .Release.Namespace }} create job --from=cronjob/{{ include "dastgate.fullname" . }}-nightly {{ include "dastgate.name" . }}-manual
+
+Dry-run the config the chart rendered (no scanning):
+
+  kubectl -n {{ .Release.Namespace }} run dastgate-dryrun --rm -it --restart=Never \
+    --image={{ include "dastgate.image" . }} \
+    --overrides='{"spec":{"volumes":[{"name":"c","configMap":{"name":"{{ include "dastgate.fullname" . }}-config"}}],"containers":[{"name":"d","image":"{{ include "dastgate.image" . }}","args":["run","--all","--dry-run","--config","/config/targets.yaml","--plans-dir","/automation"],"volumeMounts":[{"name":"c","mountPath":"/config"}]}]}}'
+
+{{ if not .Values.defectDojo.url }}
+WARNING: defectDojo.url is unset, so scan results are not uploaded anywhere.
+{{- end }}
+{{- if and (not .Values.externalSecret.enabled) (not .Values.secret.defectDojoToken) .Values.defectDojo.url }}
+WARNING: defectDojo.url is set but no DefectDojo token was provided
+         (secret.defectDojoToken). Uploads will be skipped until a token exists.
+{{- end }}

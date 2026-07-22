@@ -1,0 +1,96 @@
+{
+  "generated": "2026-07-22T14:16:31Z",
+  "summary": "dastgate is a scheduled DAST orchestrator for Kubernetes: a small Python CLI runs OWASP ZAP (Automation Framework) and Nuclei against already-deployed targets and reimports the reports into DefectDojo over its REST API. It ships as a generic Helm chart (CronJob per schedule) and a container image bundling the scanners; the DefectDojo client is stdlib urllib and failure-isolated.",
+  "entrypoints": [
+    "src/dastgate/__main__.py:main",
+    "charts/dastgate/templates/cronjob.yaml:CronJob",
+    "Dockerfile:ENTRYPOINT"
+  ],
+  "modules": {
+    "model": {
+      "path": "src/dastgate/model.py",
+      "purpose": "Typed, dependency-free config dataclasses and enums (the in-memory shape of targets.yaml).",
+      "exports": ["ScanPolicy", "Schedule", "AuthProfile", "Target", "DefectDojoConfig", "Config"],
+      "depends_on": []
+    },
+    "config": {
+      "path": "src/dastgate/config.py",
+      "purpose": "Load & validate targets.yaml (or JSON) into a Config; apply defaults; reject dupes/missing fields.",
+      "exports": ["load_config", "parse_config", "ConfigError"],
+      "depends_on": ["model", "PyYAML (lazy)"]
+    },
+    "zap": {
+      "path": "src/dastgate/zap.py",
+      "purpose": "Pick the ZAP AF plan for a policy, export ${DASTGATE_*} env, build & run zap.sh, return the report path. Runner is injectable for tests.",
+      "exports": ["plan_for_policy", "build_env", "build_command", "run_scan", "ScanArtifacts"],
+      "depends_on": ["model"]
+    },
+    "nuclei": {
+      "path": "src/dastgate/nuclei.py",
+      "purpose": "Build & run the nuclei command (JSONL output; -dast for non-baseline targets). Runner injectable.",
+      "exports": ["build_command", "run_scan", "report_name", "NucleiArtifacts"],
+      "depends_on": ["model"]
+    },
+    "defectdojo": {
+      "path": "src/dastgate/defectdojo.py",
+      "purpose": "reimport-scan client: build multipart/form-data, POST via urllib, never raise (failure-isolated).",
+      "exports": ["reimport", "build_multipart", "ReimportResult"],
+      "depends_on": ["stdlib urllib"]
+    },
+    "cli": {
+      "path": "src/dastgate/__main__.py",
+      "purpose": "The `dastgate run` CLI: parse args, select targets by name/schedule, orchestrate scan + upload with per-target failure isolation.",
+      "exports": ["main", "orchestrate", "scan_target", "build_parser"],
+      "depends_on": ["config", "zap", "nuclei", "defectdojo", "model"]
+    },
+    "chart": {
+      "path": "charts/dastgate/",
+      "purpose": "Generic Helm chart: renders targets.yaml into a ConfigMap, provisions a plain Secret or ExternalSecret, and creates a CronJob per enabled schedule.",
+      "exports": ["Chart.yaml", "values.yaml", "templates/cronjob.yaml", "templates/configmap.yaml", "templates/secret.yaml", "templates/externalsecret.yaml", "templates/serviceaccount.yaml", "templates/_helpers.tpl", "templates/NOTES.txt"],
+      "depends_on": ["dastgate image", "automation plans (baked into image)"]
+    },
+    "automation": {
+      "path": "automation/",
+      "purpose": "ZAP Automation Framework plans, one per policy; each ends in a report job writing DefectDojo-ingestible XML.",
+      "exports": ["zap-baseline.yaml", "full-active.yaml", "api-scan.yaml"],
+      "depends_on": []
+    }
+  },
+  "callgraph_highlights": [
+    {
+      "caller": "__main__.main",
+      "calls": ["config.load_config", "__main__.orchestrate"],
+      "note": "Entry: parse args, refuse without --all/--target/--schedule, load config, dispatch."
+    },
+    {
+      "caller": "__main__.orchestrate",
+      "calls": ["Config.select", "__main__.scan_target"],
+      "note": "Filter targets by name/schedule; per-target try/except isolates failures; returns exit code."
+    },
+    {
+      "caller": "__main__.scan_target",
+      "calls": ["zap.run_scan", "nuclei.run_scan", "__main__._upload"],
+      "note": "Run ZAP (always) + Nuclei (if enabled); upload each report."
+    },
+    {
+      "caller": "__main__._upload",
+      "calls": ["defectdojo.reimport"],
+      "note": "Skips silently if sink disabled (no url) or token empty; never fatal."
+    },
+    {
+      "caller": "chart:cronjob.yaml",
+      "calls": ["dastgate run --schedule <name>"],
+      "note": "The deployed entrypoint; mounts the ConfigMap targets.yaml, envFrom the secret."
+    }
+  ],
+  "hotspots": [
+    "src/dastgate/__main__.py",
+    "src/dastgate/model.py",
+    "src/dastgate/config.py",
+    "src/dastgate/defectdojo.py",
+    "charts/dastgate/values.yaml",
+    "charts/dastgate/templates/cronjob.yaml",
+    "charts/dastgate/templates/configmap.yaml",
+    "automation/zap-baseline.yaml"
+  ]
+}

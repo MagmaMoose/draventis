@@ -1,12 +1,20 @@
 """dastgate — scheduled DAST (OWASP ZAP + Nuclei) that reimports into DefectDojo.
 
-Phase 0 scaffold: this package is intentionally empty. dastgate will run scheduled
-ZAP (Automation Framework) + Nuclei scans against deployed/staging environments and
-reimport the results into DefectDojo over its REST API, mirroring chargate's
-stdlib-``urllib`` uploader ethos.
+dastgate runs scheduled ZAP (Automation Framework) and Nuclei scans against
+already-deployed targets and reimports the results into DefectDojo over its REST
+API. The DefectDojo client is stdlib ``urllib`` and failure-isolated: an upload
+error never fails a scan.
 
-Nothing here runs yet. The intended module layout is in ``docs/DESIGN.md`` (§5.1);
-see the "Status: Planning (Phase 0)" note in ``README.md``.
+Module map (see ``docs/architecture.md``):
+
+- :mod:`dastgate.model`      — typed config dataclasses (``Target``, ``ScanPolicy`` ...)
+- :mod:`dastgate.config`     — load/validate ``targets.yaml``
+- :mod:`dastgate.zap`        — pick + run the ZAP Automation Framework plan
+- :mod:`dastgate.nuclei`     — run Nuclei
+- :mod:`dastgate.defectdojo` — ``reimport-scan`` client (urllib, failure-isolated)
+- :mod:`dastgate.__main__`   — the ``dastgate run`` CLI
 """
 
-__version__ = "0.0.0"
+from __future__ import annotations
+
+__version__ = "0.1.0"
