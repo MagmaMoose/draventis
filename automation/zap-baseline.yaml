@@ -1,28 +1,22 @@
-# ---------------------------------------------------------------------------
-# EXAMPLE — ZAP Automation Framework plan: passive baseline scan.
+# OWASP ZAP Automation Framework plan — passive BASELINE scan.
 #
-# Phase 0 scaffold. This is an illustrative, valid AF plan skeleton, NOT a
-# wired-up job. Nothing in this repo renders or runs it yet — see
-# ../docs/DESIGN.md (§5.4) for how zap.py will template per-target plans.
+# Rendered by dastgate at runtime (src/dastgate/zap.py): ${TARGET_URL},
+# ${REPORT_DIR} and ${REPORT_FILE} are substituted per target BEFORE ZAP runs, so
+# ZAP receives literal values. reportFile has no extension → ZAP appends the
+# template's (.xml), yielding ${REPORT_DIR}/${REPORT_FILE}.xml — exactly what
+# DefectDojo's "ZAP Scan" parser ingests.
 #
-# Passive baseline = spider + passive rules only. NO active attacks and NO
-# ajax-spider, so it is safe/non-destructive to run against prod-facing hosts.
-# The target comes from the DASTGATE_TARGET_URL environment variable (ZAP AF
-# substitutes ${VAR} at plan-load time). Targets and credentials MUST come only
-# from OCI Vault config we control — never from a scanned response.
-#
-# Run (once the container exists):
-#   zap.sh -cmd -autorun /path/to/zap-baseline.yaml
-# Produces /zap/wrk/zap-baseline.xml → reimport into DefectDojo as "ZAP Scan".
-# ---------------------------------------------------------------------------
-
+# Baseline = spider + passive rules only (NO active attacks, NO ajaxSpider) — safe
+# to run nightly against prod-facing hosts. The full-active plan (staging only) is
+# a later phase. Targets/credentials come only from OCI-Vault config we control,
+# never from a scanned response.
 env:
   contexts:
-    - name: baseline-target
+    - name: dastgate-target
       urls:
-        - "${DASTGATE_TARGET_URL}"
+        - "${TARGET_URL}"
       includePaths:
-        - "${DASTGATE_TARGET_URL}.*"
+        - "${TARGET_URL}.*"
       excludePaths:
         - ".*/logout.*"
         - ".*/admin/delete.*"
@@ -30,24 +24,23 @@ env:
     failOnError: true
     failOnWarning: false
     progressToStdout: true
-
 jobs:
-  # Configure the passive scanner (all passive rules on).
+  # Configure the passive scanner (all passive rules, in-scope only).
   - type: passiveScan-config
     parameters:
-      enableTags: false
+      maxAlertsPerRule: 10
       scanOnlyInScope: true
 
-  # Crawl the site to seed the tree (traditional spider only — no ajaxSpider,
-  # so this stays passive and non-destructive).
+  # Crawl to seed the tree (traditional spider only — no ajaxSpider).
   - type: spider
     parameters:
-      context: baseline-target
+      context: dastgate-target
+      url: "${TARGET_URL}"
       maxDuration: 5
       maxDepth: 10
       maxChildren: 0
 
-  # Let passive scanning drain its queue before reporting.
+  # Drain the passive-scan queue before reporting.
   - type: passiveScan-wait
     parameters:
       maxDuration: 10
@@ -56,5 +49,7 @@ jobs:
   - type: report
     parameters:
       template: traditional-xml
-      reportDir: /zap/wrk
-      reportFile: zap-baseline.xml
+      reportDir: "${REPORT_DIR}"
+      reportFile: "${REPORT_FILE}"
+      reportTitle: "dastgate ZAP baseline"
+      reportDescription: "Passive baseline scan of ${TARGET_URL} (dastgate)."

@@ -5,11 +5,52 @@ Scheduled **DAST** (Dynamic Application Security Testing) for MagmaMoose:
 **Nuclei** run on a schedule against deployed/staging environments, with
 results reimported into **DefectDojo**.
 
-> **Status: Planning (Phase 0).** This is the seed repo. Nothing here scans yet
-> — the `src/` package is empty, the Helm chart is a stub (`appVersion 0.0.0`),
-> and `automation/zap-baseline.yaml` is an illustrative example, not a wired-up
-> job. See [`docs/DESIGN.md`](docs/DESIGN.md) for the full design and the
-> crawl/walk/run rollout that turns this scaffold into a running service.
+> **Status: Phase 1 — nightly ZAP baseline.** The `src/dastgate` package renders +
+> runs a ZAP Automation Framework **baseline** (passive) plan per target and
+> reimports the report into DefectDojo (`ZAP Scan` parser). Ships as a Helm chart
+> (a nightly CronJob + ExternalSecret) — see [Running](#running-phase-1). Not yet
+> wired into Flux. Nuclei, authenticated, and full-active scans are later phases;
+> see [`docs/DESIGN.md`](docs/DESIGN.md) and its crawl/walk/run rollout.
+
+---
+
+## Running (Phase 1)
+
+Cluster (Helm — a nightly CronJob + ExternalSecret; targets + DefectDojo token come
+from OCI Vault via External Secrets Operator):
+
+```sh
+helm template dastgate charts/dastgate      # render/inspect
+```
+
+Container (ZAP + the `dastgate` CLI baked in):
+
+```sh
+docker build -t ghcr.io/magmamoose/dastgate:0.1.0 .
+docker run --rm -v "$PWD/targets.yaml:/etc/dastgate/targets.yaml:ro" \
+  -e DEFECTDOJO_URL -e DEFECTDOJO_TOKEN \
+  ghcr.io/magmamoose/dastgate:0.1.0 run --all
+```
+
+Locally, scan-only (no upload — needs `zap.sh` on `PATH`):
+
+```sh
+uv run dastgate run --all --no-upload --targets-file targets.yaml --automation-dir automation
+```
+
+`targets.yaml` (also the OCI-Vault `dastgate-targets` key):
+
+```yaml
+targets:
+  - name: my-service            # DefectDojo product
+    url: https://my-service.magmamoose.com
+    plan: zap-baseline          # optional (automation/<plan>.yaml)
+    engagement: DAST            # optional
+```
+
+DefectDojo config comes from the environment (`DEFECTDOJO_URL`, `DEFECTDOJO_TOKEN`,
+`DD_PRODUCT_TYPE`). The uploader is **failure-isolated** — a DefectDojo outage is
+logged and never fails the scan job.
 
 ---
 

@@ -1,123 +1,58 @@
 # =============================================================================
-# dastgate — Helm values (Phase 0 scaffold)
+# dastgate — Helm values (Phase 1: nightly ZAP baseline → DefectDojo)
 #
-# STUB VALUES. This chart has no templates yet; nothing below is consumed by a
-# running CronJob. Shapes are indicative of the intended design (see
-# ../../docs/DESIGN.md §5.3 / §5.6) and WILL change before first deploy.
-# Do NOT point this at a real environment expecting it to scan.
+# One CronJob runs the dastgate image (`dastgate run --all`) on a schedule. It
+# reads the target list + DefectDojo token from a Secret that External Secrets
+# Operator materialises from OCI Vault (see externalSecrets below). The scan is a
+# passive baseline — prod-safe. Nuclei and full-active/authenticated scans land in
+# later phases.
 # =============================================================================
 
-# Global image pull settings (Phase 0 placeholder).
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# --- dastgate scanner image ---------------------------------------------------
-# Planned: FROM zaproxy/zaproxy:stable (ZAP + JRE + headless browsers for
-# browser-based OIDC auth) + the nuclei binary + the python `dastgate` package.
-# Pinned to 0.0.0 — no image is published yet.
 image:
   repository: ghcr.io/magmamoose/dastgate
-  tag: "0.0.0" # Phase 0: no release built yet
+  tag: "" # defaults to Chart.appVersion; a Flux ImagePolicy can bump it
   pullPolicy: IfNotPresent
 
-# --- Targets ------------------------------------------------------------------
-# Source of truth is the `dastgate-targets` key in OCI Vault, mounted by ESO as
-# targets.yaml (see externalSecrets below). The list here is an INLINE EXAMPLE
-# only, to document the shape — expect it to be supplied by the secret, not
-# hard-coded in values.
-#   policy: baseline (passive, prod-safe) | full (active, staging only) | api
-targets:
-  - name: dojo
-    product: magmamoose/defectdojo
-    url: https://defectdojo.magmamoose.com
-    policy: baseline # passive only — the crawl-phase dog-food target
-    schedule: nightly
-  # - name: app-staging
-  #   product: magmamoose/app
-  #   url: https://app.staging.magmamoose.com
-  #   policy: full            # active scan allowed (staging)
-  #   openapi: https://app.staging.magmamoose.com/openapi.json
-  #   auth:
-  #     type: browser-oidc     # authentik / oauth2-proxy
-  #     login_url: https://app.staging.magmamoose.com/login
-  #     user_ref: dastgate-app-staging-user
-  #   schedule: weekly
-
-# --- Schedules ----------------------------------------------------------------
-# Two CronJobs are planned: a nightly passive baseline (+ Nuclei) and a weekly
-# full-active run against staging only. concurrencyPolicy Forbid, with an
-# activeDeadlineSeconds cap so a hung scan cannot run forever.
-schedules:
-  nightly:
-    enabled: true
-    cron: "0 3 * * *" # 03:00 — passive baseline on prod-facing + staging
-    activeDeadlineSeconds: 5400
-  weekly:
-    enabled: false # Phase 0: off until auth + staging active scanning land
-    cron: "0 4 * * 0" # 04:00 Sunday — full active, staging only
-    activeDeadlineSeconds: 10800
+# Nightly passive baseline. concurrencyPolicy Forbid + activeDeadlineSeconds so a
+# hung scan can never overlap or run forever.
+schedule: "0 3 * * *"
 concurrencyPolicy: Forbid
+backoffLimit: 1
+activeDeadlineSeconds: 5400 # 90 min
+args: ["run", "--all"]
 
-# --- DefectDojo sink ----------------------------------------------------------
-# Presence of `url` enables the sink (same "sink enabled by host-URL presence"
-# rule chargate uses). The API token comes from ESO, never values.
+# DefectDojo sink. In-cluster service DNS (no Cloudflare round-trip; avoids the
+# edge WAF that 1010-blocks urllib). The API token comes from ESO, never here.
 defectDojo:
-  url: https://defectdojo.magmamoose.com
-  productType: "MagmaMoose" # DefectDojo product-type grouping for DAST products
-  engagementPrefix: "DAST — "
-  autoCreateContext: true # DefectDojo creates product/engagement/test on first run
-  closeOldFindings: true # fixed alerts auto-mitigate per engagement
-  tags:
-    - dast
+  url: http://defectdojo-django.security.svc.cluster.local
+  productType: "DAST"
 
-# --- Nuclei -------------------------------------------------------------------
-# Complementary fast templated scanner. Toggle off for the crawl phase (ZAP
-# baseline only); turned on in the walk phase.
-nuclei:
-  enabled: false # Phase 0: ZAP baseline first, Nuclei added in the walk phase
-  image:
-    repository: projectdiscovery/nuclei
-    tag: "" # Phase 0: unset — pin at adoption time
-  dast: false # `-dast` fuzzing is staging-only, run phase
-
-# --- External Secrets Operator (OCI Vault) ------------------------------------
-# ESO materialises the targets list, DefectDojo token, and per-target scan creds
-# from OCI Vault. Refs below are placeholders for Phase 0.
+# External Secrets Operator (OCI Vault). One Secret carries the DefectDojo token
+# (env) + the whole targets.yaml document (mounted file). Provision these two OCI
+# Vault keys once; nothing target-specific lives in git.
 externalSecrets:
-  enabled: false # Phase 0: not wired until the first real deploy
-  secretStoreRef:
-    name: oci-vault
-    kind: ClusterSecretStore
+  enabled: true
+  store: oci-vault
+  storeKind: ClusterSecretStore
   refreshInterval: "1h"
-  # OCI Vault keys → k8s Secret keys the CronJob mounts / envs from.
-  data:
-    - secretKey: targets.yaml # mounted file — the targets list
-      remoteRef: dastgate-targets
-    - secretKey: DEFECTDOJO_TOKEN # env — reimport-scan auth
-      remoteRef: dastgate-defectdojo-token
-    # - secretKey: ZAP_USER        # env — per-target authentik scanbot user
-    #   remoteRef: dastgate-app-staging-user
-    # - secretKey: ZAP_PASS
-    #   remoteRef: dastgate-app-staging-pass
+  defectDojoTokenKey: dastgate-defectdojo-token # OCI Vault key → DEFECTDOJO_TOKEN
+  targetsKey: dastgate-targets # OCI Vault key → targets.yaml
 
-# --- Pod scheduling / hardening ----------------------------------------------
-# Heavy scan pods pinned to the worker node; CPU requests only, no limits (node
-# convention). Minimal ServiceAccount — dastgate needs NO cluster API access
-# (it only talks HTTP to targets + DefectDojo).
-serviceAccount:
-  create: true
-  name: ""
+# Heavy scan pods pinned to the worker node (house convention); CPU request only
+# (no CPU limit), memory limited. dastgate talks only HTTP to targets + DefectDojo,
+# so it needs no ServiceAccount token (set on the pod spec).
 nodeSelector:
-  role: worker
+  node-role.kubernetes.io/worker: ""
 resources:
   requests:
     cpu: "500m"
     memory: "1Gi"
-  # No CPU/memory limits by node convention.
-securityContext:
+  limits:
+    memory: "4Gi" # ZAP + JVM is memory-hungry
+podSecurityContext:
   runAsNonRoot: true
   seccompProfile:
     type: RuntimeDefault
-tolerations: []
-affinity: {}

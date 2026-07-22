@@ -1,0 +1,58 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "dastgate.fullname" . }}
+  labels: {{- include "dastgate.labels" . | nindent 4 }}
+spec:
+  schedule: {{ .Values.schedule | quote }}
+  concurrencyPolicy: {{ .Values.concurrencyPolicy }}
+  startingDeadlineSeconds: 300
+  successfulJobsHistoryLimit: 3
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      backoffLimit: {{ .Values.backoffLimit }}
+      activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
+      template:
+        metadata:
+          labels: {{- include "dastgate.selectorLabels" . | nindent 12 }}
+        spec:
+          restartPolicy: Never
+          automountServiceAccountToken: false
+          {{- with .Values.nodeSelector }}
+          nodeSelector: {{- toYaml . | nindent 12 }}
+          {{- end }}
+          securityContext: {{- toYaml .Values.podSecurityContext | nindent 12 }}
+          containers:
+            - name: dastgate
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+              imagePullPolicy: {{ .Values.image.pullPolicy }}
+              args: {{- toYaml .Values.args | nindent 16 }}
+              env:
+                - name: DEFECTDOJO_URL
+                  value: {{ .Values.defectDojo.url | quote }}
+                - name: DD_PRODUCT_TYPE
+                  value: {{ .Values.defectDojo.productType | quote }}
+                - name: DEFECTDOJO_TOKEN
+                  valueFrom:
+                    secretKeyRef:
+                      name: {{ include "dastgate.fullname" . }}
+                      key: DEFECTDOJO_TOKEN
+                - name: DASTGATE_TARGETS_FILE
+                  value: /etc/dastgate/targets.yaml
+              volumeMounts:
+                - name: targets
+                  mountPath: /etc/dastgate
+                  readOnly: true
+                - name: work
+                  mountPath: /zap/wrk
+              resources: {{- toYaml .Values.resources | nindent 16 }}
+          volumes:
+            - name: targets
+              secret:
+                secretName: {{ include "dastgate.fullname" . }}
+                items:
+                  - key: targets.yaml
+                    path: targets.yaml
+            - name: work
+              emptyDir: {}
