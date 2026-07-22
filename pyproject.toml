@@ -70,4 +70,5 @@ version_variables = [
     "src/dastgate/__init__.py:__version__",
     "charts/dastgate/Chart.yaml:appVersion",
 ]
-allow_zero_version = true # stay on 0.x (project is alpha); first release is 0.1.0
+allow_zero_version = true  # stay on 0.x (project is alpha); first release is 0.1.0
+major_on_zero = false      # breaking changes stay on 0.x until we're ready for 1.0
