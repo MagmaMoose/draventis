@@ -15,6 +15,10 @@ spec:
       activeDeadlineSeconds: {{ .Values.activeDeadlineSeconds }}
       template:
         metadata:
+          {{- with .Values.podAnnotations }}
+          annotations:
+            {{- toYaml . | nindent 12 }}
+          {{- end }}
           labels: {{- include "dastgate.selectorLabels" . | nindent 12 }}
         spec:
           restartPolicy: Never
@@ -27,6 +31,8 @@ spec:
             - name: dastgate
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
               imagePullPolicy: {{ .Values.image.pullPolicy }}
+              securityContext:
+                {{- toYaml .Values.containerSecurityContext | nindent 16 }}
               args: {{- toYaml .Values.args | nindent 16 }}
               env:
                 - name: DEFECTDOJO_URL

@@ -52,6 +52,19 @@ resources:
     memory: "1Gi"
   limits:
     memory: "4Gi" # ZAP + JVM is memory-hungry
+podAnnotations: {}
+  # AppArmor example:
+  #   container.apparmor.security.beta.kubernetes.io/dastgate: runtime/default
+
+containerSecurityContext:
+  allowPrivilegeEscalation: false
+  runAsNonRoot: true
+  runAsUser: 1000 # zap user in the base image
+  capabilities:
+    drop:
+      - ALL
+  readOnlyRootFilesystem: false # ZAP needs writable /zap/wrk (mounted emptyDir)
+
 podSecurityContext:
   runAsNonRoot: true
   seccompProfile:
