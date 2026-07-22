@@ -1,5 +1,9 @@
 # dastgate
 
+[![CI](https://github.com/MagmaMoose/dastgate/actions/workflows/ci.yml/badge.svg)](https://github.com/MagmaMoose/dastgate/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
+
 Scheduled **DAST** (Dynamic Application Security Testing) for Kubernetes.
 [**OWASP ZAP**](https://www.zaproxy.org/) (driven by the ZAP Automation
 Framework) + [**Nuclei**](https://github.com/projectdiscovery/nuclei) run on a
@@ -103,11 +107,15 @@ either a plain Kubernetes Secret (default) or
 
 ## Authenticated scanning
 
-Apps behind an OIDC proxy need dastgate to authenticate. Two complementary
-approaches (see [`docs/design.md`](docs/design.md)):
+Apps behind an OIDC proxy need dastgate to authenticate. The config model accepts
+per-target `auth` (and dastgate exports the login URL + credentials into the
+scan environment), but **the shipped AF plans do not yet include an
+`authentication` block** — wiring it in is a per-target step you add to the plan
+today. Two complementary approaches (see [`docs/design.md`](docs/design.md)):
 
-1. **Behind the proxy** — ZAP Browser-Based Authentication drives the real OIDC
-   login headlessly and re-authenticates when the session drops. Use a
+1. **Behind the proxy** — ZAP Browser-Based Authentication can drive the real
+   OIDC login headlessly and re-authenticate when the session drops, once you add
+   an `authentication` (browser) + `verification` block to the plan. Use a
    dedicated low-privilege scan user.
 2. **Origin directly** — scan the in-cluster Service, bypassing the proxy, to
    test the app as if the proxy were removed (defense-in-depth).
@@ -116,9 +124,12 @@ approaches (see [`docs/design.md`](docs/design.md)):
 
 ```bash
 uv sync
-uv run dastgate run --all --config targets.yaml --dry-run   # plan only, no scan
+cp targets.example.yaml targets.local.yaml                        # then edit it
+uv run dastgate run --all --config targets.local.yaml --dry-run   # plan only, no scan
 uv run pytest -q
 ```
+
+`targets.local.yaml` is gitignored, so your real hosts never get committed.
 
 The container image (`Dockerfile`) bundles ZAP + headless browsers + Nuclei +
 the CLI; the actual scanning happens there. See
@@ -134,7 +145,8 @@ single `baseline` target against a safe host.
 
 ## Documentation
 
-Full docs (MkDocs): run `mkdocs serve` or see [`docs/`](docs/).
+Full docs (MkDocs): `pip install mkdocs-material && mkdocs serve`, or just read
+[`docs/`](docs/).
 
 - [Setup](docs/setup.md) — local dev, building the image
 - [Deployment](docs/deployment.md) — Helm on any cluster

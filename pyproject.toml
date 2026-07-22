@@ -12,6 +12,19 @@ requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Caleb Sargeant", email = "caleb@magmamoose.com" }]
 keywords = ["security", "dast", "zap", "nuclei", "defectdojo", "cronjob", "helm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
 dependencies = ["PyYAML>=6"]
 
 [project.scripts]
@@ -20,6 +33,9 @@ dastgate = "dastgate.__main__:main"
 [project.urls]
 Homepage = "https://github.com/MagmaMoose/dastgate"
 Source = "https://github.com/MagmaMoose/dastgate"
+Documentation = "https://github.com/MagmaMoose/dastgate/tree/main/docs"
+Issues = "https://github.com/MagmaMoose/dastgate/issues"
+Changelog = "https://github.com/MagmaMoose/dastgate/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]

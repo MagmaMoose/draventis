@@ -125,6 +125,10 @@ Most apps behind an OIDC proxy need dastgate to authenticate. Do both:
    were removed — valuable, since a misconfigured route would strip your only
    authn layer.
 
+**Status:** the config model and credential plumbing exist, but the shipped AF
+plans don't yet include an `authentication` block — adding it to a plan is
+currently a per-target step.
+
 **Safety:** targets and credentials come **only** from config you control, never
 from a scanned response. Active scans hit staging, never production.
 

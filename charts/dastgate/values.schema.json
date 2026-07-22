@@ -1,0 +1,82 @@
+{
+  "$schema": "https://json-schema.org/draft-07/schema#",
+  "title": "dastgate chart values",
+  "type": "object",
+  "additionalProperties": true,
+  "properties": {
+    "image": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "repository": { "type": "string", "minLength": 1 },
+        "tag": { "type": "string" },
+        "pullPolicy": { "enum": ["Always", "IfNotPresent", "Never"] },
+        "pullSecrets": { "type": "array" }
+      },
+      "required": ["repository"]
+    },
+    "targets": {
+      "type": ["array", "null"],
+      "items": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "name": { "type": "string", "minLength": 1 },
+          "url": { "type": "string", "pattern": "^https?://" },
+          "product": { "type": "string" },
+          "policy": { "enum": ["baseline", "full", "api"] },
+          "schedule": { "enum": ["nightly", "weekly"] },
+          "openapi": { "type": "string" }
+        },
+        "required": ["name", "url"]
+      }
+    },
+    "defectDojo": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "url": { "type": "string", "pattern": "^$|^https?://" },
+        "productType": { "type": "string" },
+        "engagementPrefix": { "type": "string" },
+        "autoCreateContext": { "type": "boolean" },
+        "closeOldFindings": { "type": "boolean" },
+        "tags": { "type": "array" }
+      }
+    },
+    "nuclei": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": { "enabled": { "type": "boolean" } }
+    },
+    "schedules": {
+      "type": "object",
+      "additionalProperties": {
+        "type": "object",
+        "additionalProperties": true,
+        "properties": {
+          "enabled": { "type": "boolean" },
+          "cron": { "type": "string", "minLength": 1 },
+          "activeDeadlineSeconds": { "type": "integer", "minimum": 1 }
+        }
+      }
+    },
+    "concurrencyPolicy": { "enum": ["Allow", "Forbid", "Replace"] },
+    "externalSecret": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "refreshInterval": { "type": "string" },
+        "data": { "type": "array" }
+      }
+    },
+    "serviceAccount": {
+      "type": "object",
+      "additionalProperties": true,
+      "properties": {
+        "create": { "type": "boolean" },
+        "name": { "type": "string" }
+      }
+    }
+  }
+}

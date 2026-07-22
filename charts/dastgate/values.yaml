@@ -97,6 +97,8 @@ secret:
 # Optional: source secrets from External Secrets Operator instead of the plain
 # Secret above (Vault / AWS / GCP / Azure / OCI ...). When enabled, the chart
 # emits an ExternalSecret and does NOT template the values under `secret`.
+# Requires External Secrets Operator >= v0.10 (uses the external-secrets.io/v1
+# API; v1beta1 was removed in ESO v0.17).
 externalSecret:
   enabled: false
   secretStoreRef:
@@ -120,6 +122,12 @@ serviceAccount:
 # --- Pod / container hardening ------------------------------------------------
 podSecurityContext:
   runAsNonRoot: true
+  # A numeric UID is REQUIRED: with runAsNonRoot and a non-numeric image user the
+  # kubelet cannot verify non-root and the pod never starts. 1000 = the `zap`
+  # user in the zaproxy base image.
+  runAsUser: 1000
+  runAsGroup: 1000
+  fsGroup: 1000 # gid 1000 owns the /zap/wrk emptyDir
   seccompProfile:
     type: RuntimeDefault
 securityContext:

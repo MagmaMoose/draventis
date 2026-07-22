@@ -57,6 +57,14 @@ def test_target_filter(config_file, capsys):
     assert "zap-baseline.yaml" in out
 
 
+def test_unmatched_target_fails_loudly(config_file, capsys):
+    # A typo'd --target must not silently exit 0 (green CronJob scanning nothing).
+    rc = main(["run", "--target", "typoooo", "--config", config_file, "--dry-run"])
+    out = capsys.readouterr().out
+    assert rc == 2
+    assert "nothing scanned" in out
+
+
 def test_refuses_without_scope(config_file, capsys):
     rc = main(["run", "--config", config_file])
     out = capsys.readouterr().out

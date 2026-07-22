@@ -40,6 +40,11 @@ def build_command(
 
     ``-dast`` fuzzing is destructive-ish and is only enabled for non-baseline
     (staging) targets by the caller.
+
+    Note: OpenAPI-spec-driven Nuclei scanning is not wired here — Nuclei consumes
+    a spec as a *local file* via ``-input-mode openapi``, which needs a
+    fetch-to-file step. ZAP handles OpenAPI targets (the ``api`` policy); Nuclei
+    scans the target URL directly.
     """
     command = [
         nuclei_cmd,
@@ -50,8 +55,6 @@ def build_command(
         str(report_path),
         "-silent",
     ]
-    if target.openapi:
-        command += ["-list", target.openapi]
     if dast:
         command += ["-dast"]
     return command

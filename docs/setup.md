@@ -19,13 +19,15 @@ uv run pytest -q        # unit tests
 
 The CLI orchestrates scans and uploads. Locally you will not have `zap.sh` /
 `nuclei` on your `PATH`, so use `--dry-run` to exercise config parsing, plan
-selection, and the upload plan without running anything:
+selection, and the upload plan without running anything. Start from the shipped
+example (`targets.local.yaml` is gitignored):
 
 ```bash
-uv run dastgate run --all --config targets.yaml --dry-run
+cp targets.example.yaml targets.local.yaml    # then edit it
+uv run dastgate run --all --config targets.local.yaml --dry-run
 ```
 
-A minimal `targets.yaml`:
+A minimal config looks like:
 
 ```yaml
 defectdojo:

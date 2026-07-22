@@ -113,8 +113,11 @@ def orchestrate(cfg: Config, args: argparse.Namespace) -> int:
     schedule = Schedule.parse(args.schedule) if args.schedule else None
     targets = cfg.select(name=args.target, schedule=schedule)
     if not targets:
-        _log("no targets matched selection")
-        return 0
+        _log(
+            "no targets matched selection "
+            f"(target={args.target!r}, schedule={args.schedule!r}) — nothing scanned"
+        )
+        return 2
     _log(f"selected {len(targets)} target(s)")
 
     failures = 0

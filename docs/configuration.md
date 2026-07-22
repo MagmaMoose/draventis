@@ -51,10 +51,17 @@ targets:
 | `policy` | `baseline` | `baseline` (passive), `full` (active), `api` (OpenAPI). |
 | `schedule` | `nightly` | Which CronJob runs it. |
 | `product` | `name` | DefectDojo product name. |
-| `openapi` | — | Spec URL; seeds `api` scans and Nuclei. |
+| `openapi` | — | Spec URL; seeds the `api` (ZAP) scan. |
 | `tags` | `defaults.tags` | Extra DefectDojo tags. |
-| `auth.type` | `none` | `browser-oidc` drives a real OIDC login. |
+| `auth.type` | `none` | `browser-oidc` is accepted, but the shipped AF plans don't yet drive it — see note below. |
 | `auth.user_env` / `auth.pass_env` | `ZAP_USER` / `ZAP_PASS` | Env vars the creds are read from. |
+
+!!! note "Authenticated scanning is not fully wired yet"
+    dastgate parses `auth` and exports `DASTGATE_LOGIN_URL` / the credential env
+    vars into the scan environment, but the shipped AF plans in `automation/` do
+    not yet contain an `authentication` block, so they scan unauthenticated. To
+    scan behind an OIDC login today, add an `authentication` (browser method) +
+    `verification` block to the plan yourself. See [Design](design.md).
 
 ### Secrets are not in this file
 

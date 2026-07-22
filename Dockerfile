@@ -8,23 +8,27 @@
 #   docker run --rm -e DEFECTDOJO_URL=... -e DEFECTDOJO_TOKEN=... \
 #     -v "$PWD/targets.yaml:/config/targets.yaml:ro" \
 #     dastgate:local run --all --config /config/targets.yaml
-FROM ghcr.io/zaproxy/zaproxy:stable
+# Pinned by digest for reproducible, verifiable builds (this is the multi-arch
+# manifest list for the :stable tag; buildx still selects the right arch).
+FROM ghcr.io/zaproxy/zaproxy:stable@sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2
 
 # Pin the Nuclei release. Override at build time: --build-arg NUCLEI_VERSION=x.y.z
 ARG NUCLEI_VERSION=3.3.7
-ARG TARGETARCH=amd64
+# TARGETARCH is injected by BuildKit per target platform — do NOT give it a
+# default, or every build would fetch the amd64 binary (broken on arm64).
+ARG TARGETARCH
 
 USER root
 
-# Install Nuclei from the pinned GitHub release.
+# Install Nuclei from the pinned GitHub release. unzip ships in the base image;
+# we don't purge it (that would remove a base tool).
 RUN set -eux; \
-    apt-get update && apt-get install -y --no-install-recommends unzip ca-certificates; \
+    : "${TARGETARCH:?BuildKit must supply TARGETARCH}"; \
     curl -fsSL -o /tmp/nuclei.zip \
       "https://github.com/projectdiscovery/nuclei/releases/download/v${NUCLEI_VERSION}/nuclei_${NUCLEI_VERSION}_linux_${TARGETARCH}.zip"; \
     unzip -o /tmp/nuclei.zip -d /usr/local/bin nuclei; \
     chmod +x /usr/local/bin/nuclei; \
     rm -f /tmp/nuclei.zip; \
-    apt-get purge -y unzip; apt-get autoremove -y; rm -rf /var/lib/apt/lists/*; \
     nuclei -version
 
 # Install the dastgate package.
@@ -35,7 +39,9 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages /src && rm -rf
 # Ship the ZAP Automation Framework plans dastgate renders per target.
 COPY automation /automation
 
-USER zap
+# Numeric USER (uid 1000 = `zap`) so the kubelet can verify runAsNonRoot even
+# without an explicit runAsUser in the pod spec.
+USER 1000:1000
 WORKDIR /zap/wrk
 
 ENTRYPOINT ["dastgate"]

@@ -49,7 +49,10 @@ def _load_yaml(text: str) -> Any:
             "PyYAML is required to read YAML config; install dastgate with its "
             "runtime dependencies, or supply the config as JSON."
         ) from exc
-    return yaml.safe_load(text)
+    try:
+        return yaml.safe_load(text)
+    except yaml.YAMLError as exc:
+        raise ConfigError(f"invalid YAML: {exc}") from exc
 
 
 def _parse_auth(raw: dict[str, Any] | None) -> AuthProfile:
@@ -74,12 +77,17 @@ def _parse_target(raw: dict[str, Any], defaults: dict[str, Any]) -> Target:
     tags = raw.get("tags") or defaults.get("tags") or []
     if isinstance(tags, str):
         tags = [t.strip() for t in tags.split(",") if t.strip()]
+    try:
+        policy = ScanPolicy.parse(raw.get("policy", defaults.get("policy")))
+        schedule = Schedule.parse(raw.get("schedule", defaults.get("schedule")))
+    except ValueError as exc:
+        raise ConfigError(f"target {name!r}: {exc}") from exc
     return Target(
         name=str(name),
         url=str(url),
         product=raw.get("product"),
-        policy=ScanPolicy.parse(raw.get("policy", defaults.get("policy"))),
-        schedule=Schedule.parse(raw.get("schedule", defaults.get("schedule"))),
+        policy=policy,
+        schedule=schedule,
         openapi=raw.get("openapi"),
         auth=_parse_auth(raw.get("auth")),
         tags=list(tags),

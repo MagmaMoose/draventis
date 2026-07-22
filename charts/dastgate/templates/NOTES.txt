@@ -7,14 +7,21 @@ Scheduled scans:
 {{- end }}
 {{- end }}
 
-Targets configured: {{ len .Values.targets }}
+Targets configured: {{ len (default (list) .Values.targets) }}
+{{- if not .Values.targets }}
+WARNING: no targets configured — nothing will be scanned.
+{{- end }}
 DefectDojo sink:    {{ if .Values.defectDojo.url }}{{ .Values.defectDojo.url }}{{ else }}DISABLED (set defectDojo.url to enable uploads){{ end }}
 Secrets backend:    {{ if .Values.externalSecret.enabled }}ExternalSecret ({{ .Values.externalSecret.secretStoreRef.name }}){{ else }}plain Secret{{ end }}
 Nuclei:             {{ if .Values.nuclei.enabled }}enabled{{ else }}disabled{{ end }}
 
 Trigger a scan now (instead of waiting for the schedule):
+{{- range $sched, $cfg := .Values.schedules }}
+{{- if $cfg.enabled }}
 
-  kubectl -n {{ .Release.Namespace }} create job --from=cronjob/{{ include "dastgate.fullname" . }}-nightly {{ include "dastgate.name" . }}-manual
+  kubectl -n {{ $.Release.Namespace }} create job --from=cronjob/{{ include "dastgate.fullname" $ }}-{{ $sched }} {{ include "dastgate.name" $ }}-manual-{{ $sched }}
+{{- end }}
+{{- end }}
 
 Dry-run the config the chart rendered (no scanning):
 

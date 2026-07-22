@@ -46,11 +46,15 @@ def build_multipart(
             b"",
             str(value).encode("utf-8"),
         ]
+    # Percent-encode CR/LF/" in the filename so it can't break out of the header
+    # (WHATWG form-data behaviour). Inputs are trusted config today; this keeps it
+    # robust if the report name ever derives from less-trusted data.
+    safe_filename = filename.replace("\r", "%0D").replace("\n", "%0A").replace('"', "%22")
     parts += [
         marker,
         (
             f'Content-Disposition: form-data; name="{file_field}"; '
-            f'filename="{filename}"'
+            f'filename="{safe_filename}"'
         ).encode(),
         f"Content-Type: {content_type}".encode(),
         b"",

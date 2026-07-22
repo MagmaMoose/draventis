@@ -74,14 +74,21 @@ def test_zap_run_scan_invokes_runner():
     assert "full-active.yaml" in seen["command"][-1]
 
 
-def test_nuclei_build_command_dast_and_openapi():
-    t = _target(openapi="https://app.example.com/openapi.json")
-    cmd = nuclei.build_command(t, Path("/wrk/nuclei-app.jsonl"), dast=True)
+def test_nuclei_build_command_dast():
+    cmd = nuclei.build_command(_target(), Path("/wrk/nuclei-app.jsonl"), dast=True)
     assert cmd[0] == "nuclei"
     assert "-dast" in cmd
     assert "-jsonl" in cmd
-    assert "https://app.example.com/openapi.json" in cmd
     assert cmd[cmd.index("-output") + 1] == "/wrk/nuclei-app.jsonl"
+
+
+def test_nuclei_command_ignores_openapi_url():
+    # Nuclei's -list wants a local file of target URLs, not a spec URL, so the
+    # openapi field must NOT leak into the command.
+    t = _target(openapi="https://app.example.com/openapi.json")
+    cmd = nuclei.build_command(t, Path("/wrk/nuclei-app.jsonl"))
+    assert "-list" not in cmd
+    assert "https://app.example.com/openapi.json" not in cmd
 
 
 def test_nuclei_run_scan_dry_run():

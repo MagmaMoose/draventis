@@ -5,7 +5,8 @@ uv sync                                        # install deps + dev tools
 uv run ruff check .                            # lint
 uv run ruff check . --fix                      # lint + autofix
 uv run pytest -q                               # unit tests
-uv run dastgate run --all --config targets.yaml --dry-run   # plan, no scan
+cp targets.example.yaml targets.local.yaml                        # first time
+uv run dastgate run --all --config targets.local.yaml --dry-run   # plan, no scan
 
 helm lint charts/dastgate                      # lint the chart
 helm template dg charts/dastgate               # render manifests
