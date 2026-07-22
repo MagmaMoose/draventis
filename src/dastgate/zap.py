@@ -6,10 +6,13 @@ rendering stays pure and unit-testable without ZAP installed.
 
 from __future__ import annotations
 
-import string
+import re
 import subprocess
 from collections.abc import Callable
 from pathlib import Path
+from typing import Any
+
+import yaml
 
 from dastgate.model import Target
 
@@ -25,6 +28,19 @@ def _default_runner(cmd: list[str]) -> subprocess.CompletedProcess[str]:
     return subprocess.run(cmd, check=False, capture_output=True, text=True)
 
 
+def _substitute(node: Any, subs: dict[str, str]) -> Any:
+    """Recursively replace placeholder tokens inside string leaves of a parsed plan."""
+    if isinstance(node, dict):
+        return {k: _substitute(v, subs) for k, v in node.items()}
+    if isinstance(node, list):
+        return [_substitute(v, subs) for v in node]
+    if isinstance(node, str):
+        for token, value in subs.items():
+            node = node.replace(token, value)
+        return node
+    return node
+
+
 def render_plan(
     template: str,
     *,
@@ -32,10 +48,23 @@ def render_plan(
     report_dir: str,
     report_file: str = REPORT_FILE,
 ) -> str:
-    """Substitute ``${TARGET_URL}`` / ``${REPORT_DIR}`` / ``${REPORT_FILE}``."""
-    return string.Template(template).safe_substitute(
-        TARGET_URL=target_url, REPORT_DIR=report_dir, REPORT_FILE=report_file
-    )
+    """Inject the target/report values into an AF plan **as YAML values**.
+
+    The template is parsed and re-dumped (``yaml.safe_load`` → substitute →
+    ``yaml.safe_dump``) so a hostile or malformed target URL is always emitted as a
+    safe, quoted scalar and can never inject Automation-Framework YAML (e.g. a
+    sneaked-in ``activeScan`` job). The scope token ``${TARGET_SCOPE_REGEX}`` is
+    regex-escaped + anchored so an unescaped ``.`` can't widen the crawl scope to
+    look-alike hosts.
+    """
+    subs = {
+        "${TARGET_URL}": target_url,
+        "${TARGET_SCOPE_REGEX}": re.escape(target_url) + ".*",
+        "${REPORT_DIR}": report_dir,
+        "${REPORT_FILE}": report_file,
+    }
+    plan = _substitute(yaml.safe_load(template), subs)
+    return yaml.safe_dump(plan, sort_keys=False, default_flow_style=False, allow_unicode=True)
 
 
 def run_baseline(

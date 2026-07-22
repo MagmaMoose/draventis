@@ -18,7 +18,8 @@ RUN python3 -m venv /opt/dastgate/venv \
     && chown -R zap:zap /opt/dastgate
 
 ENV DASTGATE_AUTOMATION_DIR=/opt/dastgate/automation \
-    DASTGATE_TARGETS_FILE=/etc/dastgate/targets.yaml
+    DASTGATE_TARGETS_FILE=/etc/dastgate/targets.yaml \
+    DASTGATE_WORK_DIR=/zap/wrk
 
 USER zap
 ENTRYPOINT ["dastgate"]

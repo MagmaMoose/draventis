@@ -26,7 +26,8 @@ render it, invoke `zap.sh -autorun`, and collect the report.
 ## How results flow to DefectDojo
 
 Every plan ends in a `report` job that writes the **traditional XML** report ZAP's
-DefectDojo parser ingests (`/zap/wrk/zap-baseline.xml`). `src/dastgate/defectdojo.py`
+DefectDojo parser ingests (`${REPORT_DIR}/zap-report.xml`, rendered per target).
+`src/dastgate/defectdojo.py`
 then POSTs it to **`/api/v2/reimport-scan/`** (stdlib `urllib`, failure-isolated —
 an upload error never fails the scan), mirroring the chargate uploader and the
 Dependency-Track ↔ DefectDojo sync:

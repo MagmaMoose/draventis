@@ -61,6 +61,7 @@ def defectdojo_config_for(target: Target, *, scan_type: str = "ZAP Scan") -> Def
         product_type_name=os.environ.get("DD_PRODUCT_TYPE", "DAST"),
         engagement_name=target.engagement,
         scan_type=scan_type,
+        test_title="ZAP baseline",  # stable reimport key: one Test per engagement
         close_old_findings=os.environ.get("DD_CLOSE_OLD", "true").lower() != "false",
         verify_ssl=os.environ.get("DD_INSECURE", "").lower() not in ("1", "true"),
     )

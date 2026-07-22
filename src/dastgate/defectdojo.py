@@ -12,6 +12,7 @@ with ``ok=False`` so the caller can log-and-continue.
 
 from __future__ import annotations
 
+import http.client
 import json
 import ssl
 import urllib.error
@@ -197,7 +198,8 @@ def upload_report(
         return DefectDojoResult(
             False, endpoint, status=exc.code, message=f"HTTP {exc.code}: {detail}"
         )
-    except (urllib.error.URLError, TimeoutError, OSError) as exc:
+    except (urllib.error.URLError, http.client.HTTPException, TimeoutError, OSError) as exc:
+        # http.client.HTTPException (IncompleteRead/BadStatusLine) is NOT an OSError.
         return DefectDojoResult(False, endpoint, message=f"connection error: {exc}")
 
 

@@ -33,7 +33,7 @@ def _scan_one(
     work_dir = os.path.join(work_root, target.name)
     try:
         report = run_baseline(target, automation_dir=automation_dir, work_dir=work_dir)
-    except OSError as exc:
+    except Exception as exc:  # per-target isolation — one bad target never aborts the run
         return ScanOutcome(target.name, False, False, None, f"scan error: {exc}")
     if report is None:
         return ScanOutcome(target.name, False, False, None, "ZAP produced no report")
@@ -81,7 +81,10 @@ def main(argv: list[str] | None = None) -> int:
         print("dastgate: no matching enabled targets", file=sys.stderr)
         return 2
 
-    work_root = tempfile.mkdtemp(prefix="dastgate-")
+    # Prefer the mounted scan workdir (the chart mounts an emptyDir at /zap/wrk);
+    # fall back to a temp dir for local runs.
+    work_root = os.environ.get("DASTGATE_WORK_DIR") or tempfile.mkdtemp(prefix="dastgate-")
+    os.makedirs(work_root, exist_ok=True)
     outcomes = [
         _scan_one(
             t,
