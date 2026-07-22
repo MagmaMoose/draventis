@@ -71,7 +71,10 @@ jobs:
         uses: magmamoose/diatreme@c0825f6732f9e471c4d7c0e6d1ac7e4cfc0738a1 # v2.5.1
         with:
           mode: release
-          versioning-tool: gitversion
+          # This is a Python repo — use python-semantic-release (config in
+          # pyproject.toml's [tool.semantic_release]). The default `gitversion`
+          # needs .NET/`dotnet`, which the self-hosted runners don't have.
+          versioning-tool: semantic-release-python
           environment: prod
           environments: '["prod"]'
           prerelease-identifiers: '{}'
