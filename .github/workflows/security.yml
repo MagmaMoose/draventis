@@ -33,6 +33,12 @@ jobs:
     steps:
       - uses: magmamoose/chargate@eaac494291b73dd9586875ba8aaed658ca24eb6c # v2.8.0
         with:
+          # Gate on net-new medium+ (default is `any`). This repo ships a Helm
+          # chart, and KICS emits a floor of low/none structural findings on any
+          # chart (no LimitRange/ResourceQuota, image ref user-configurable so no
+          # digest, etc.) that aren't fixable in a distributable app chart. Real
+          # medium/high/critical issues still block.
+          fail_on: medium
           defectdojo_url: ${{ vars.MM_DEFECTDOJO_URL }}
           defectdojo_token: ${{ secrets.MM_DEFECTDOJO_API_KEY }}
           dependency_track_url: ${{ vars.MM_DEPENDENCY_TRACK_URL }}

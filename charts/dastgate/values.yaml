@@ -109,11 +109,9 @@ externalSecret:
     name: "" # e.g. cluster-secret-store
     kind: ClusterSecretStore
   refreshInterval: "1h"
-  # Map remote keys -> the env keys dastgate expects (DEFECTDOJO_TOKEN, ZAP_*).
+  # Map remote store keys -> the env keys dastgate expects (DEFECTDOJO_TOKEN,
+  # ZAP_*). See docs/deployment.md for a worked example.
   data: []
-  #   - secretKey: DEFECTDOJO_TOKEN
-  #     remoteRef:
-  #       key: dastgate-defectdojo-token
 
 # --- ServiceAccount -----------------------------------------------------------
 # dastgate needs NO Kubernetes API access, so the account has no RBAC and does
@@ -126,11 +124,10 @@ serviceAccount:
 # --- Pod / container hardening ------------------------------------------------
 podSecurityContext:
   runAsNonRoot: true
-  # A numeric UID is REQUIRED: with runAsNonRoot and a non-numeric image user the
-  # kubelet cannot verify non-root and the pod never starts. 1000 = the `zap`
-  # user in the zaproxy base image.
-  runAsUser: 1000
-  runAsGroup: 1000
+  # No runAsUser here on purpose: the image declares a numeric non-root user
+  # (USER 1000:1000 in the Dockerfile), which is what lets the kubelet verify
+  # runAsNonRoot. If you override `image` with one that uses a NON-numeric USER,
+  # set runAsUser to that image's numeric UID or the pod won't start.
   fsGroup: 1000 # gid 1000 owns the /zap/wrk emptyDir
   seccompProfile:
     type: RuntimeDefault

@@ -5,14 +5,13 @@ matches. concurrencyPolicy Forbid + activeDeadlineSeconds stop a hung scan from
 piling up or running forever.
 */ -}}
 {{- /*
-  Reviewed KICS suppressions (accepted risk / not applicable to a distributable chart):
-    02323c00  runAsUser 1000 IS the base image's own non-root user (raising it breaks file ownership)
-    a9c2f49d  ZAP needs a writable root filesystem (session/config live under $HOME)
-    caa3479d / 7c81d34c  the image ref is user-configurable — a chart can't pin a digest / force Always
+  Accepted low/none KICS findings for this chart (not fixable in a distributable
+  app chart; the security gate is set to fail_on: medium):
+    a9c2f49d  readOnlyRootFilesystem: false — ZAP writes session/config under $HOME
+    caa3479d / 7c81d34c  the image ref is user-configurable — can't pin a digest / force Always
     4a20ebac / 48a5beba  LimitRange / ResourceQuota are namespace policy, not an app chart's concern
-    3d658f8b  env-var secret delivery (envFrom) is the intended token/credential mechanism
+    3d658f8b  env-var secret delivery (envFrom) is the intended credential mechanism
 */ -}}
-# kics-scan disable=02323c00-cdc3-4fdc-a310-4f2b3e7a1660,a9c2f49d-0671-4fc9-9ece-f4e261e128d0,caa3479d-885d-4882-9aac-95e5e78ef5c2,7c81d34c-8e5a-402b-9798-9f442630e678,4a20ebac-1060-4c81-95d1-1f7f620e983b,48a5beba-e4c0-4584-a2aa-e6894e4cf424,3d658f8b-d988-41a0-a841-40043121de1e
 {{- range $sched, $cfg := .Values.schedules }}
 {{- if $cfg.enabled }}
 ---
