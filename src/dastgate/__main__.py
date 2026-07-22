@@ -68,7 +68,8 @@ def _upload(cfg: Config, target: Target, report_path: Path, kind: str, *, dry_ru
         close_old_findings=dd.close_old_findings,
     )
     if result.ok:
-        _log(f"  reimported {report_path.name} (HTTP {result.status})")
+        link = f" — {result.url}" if result.url else ""
+        _log(f"  reimported {report_path.name} (HTTP {result.status}){link}")
     else:
         _log(f"  upload failed (non-fatal): {result.error}")
 

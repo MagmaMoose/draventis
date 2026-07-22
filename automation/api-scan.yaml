@@ -17,7 +17,8 @@ env:
       urls:
         - "${DASTGATE_TARGET_URL}"
       includePaths:
-        - "${DASTGATE_TARGET_URL}.*"
+        # Pre-escaped regex (dots in the host are literal, not wildcards).
+        - "${DASTGATE_TARGET_SCOPE_REGEX}"
   parameters:
     failOnError: true
     failOnWarning: false

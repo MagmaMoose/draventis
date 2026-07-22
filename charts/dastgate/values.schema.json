@@ -61,6 +61,7 @@
       }
     },
     "concurrencyPolicy": { "enum": ["Allow", "Forbid", "Replace"] },
+    "startingDeadlineSeconds": { "type": "integer", "minimum": 0 },
     "externalSecret": {
       "type": "object",
       "additionalProperties": true,

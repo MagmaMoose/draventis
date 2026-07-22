@@ -17,6 +17,9 @@ metadata:
 spec:
   schedule: {{ $cfg.cron | quote }}
   concurrencyPolicy: {{ $.Values.concurrencyPolicy }}
+  {{- with $.Values.startingDeadlineSeconds }}
+  startingDeadlineSeconds: {{ . }}
+  {{- end }}
   successfulJobsHistoryLimit: {{ $.Values.successfulJobsHistoryLimit }}
   failedJobsHistoryLimit: {{ $.Values.failedJobsHistoryLimit }}
   jobTemplate:

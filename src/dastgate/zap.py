@@ -9,6 +9,7 @@ plan writes. The scanning itself is done by ZAP; this module is just the glue.
 from __future__ import annotations
 
 import os
+import re
 import subprocess
 from collections.abc import Callable, Mapping
 from dataclasses import dataclass
@@ -48,6 +49,9 @@ def build_env(target: Target, base_env: Mapping[str, str] | None = None) -> dict
     """Build the environment ZAP resolves ``${...}`` placeholders from."""
     env = dict(base_env if base_env is not None else os.environ)
     env["DASTGATE_TARGET_URL"] = target.url
+    # ZAP `includePaths` are regexes, so a raw URL would leave every `.` in the
+    # hostname as a live wildcard (scope-widening). Export a pre-escaped scope.
+    env["DASTGATE_TARGET_SCOPE_REGEX"] = re.escape(target.url) + ".*"
     if target.openapi:
         env["DASTGATE_OPENAPI_URL"] = target.openapi
     if target.auth.enabled and target.auth.login_url:

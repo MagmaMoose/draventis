@@ -30,6 +30,12 @@ def test_build_env_exports_target_and_auth():
     assert env["PATH"] == "/usr/bin"  # base env preserved
 
 
+def test_build_env_scope_regex_escapes_dots():
+    # includePaths are regexes; the host's dots must be literal, not wildcards.
+    env = zap.build_env(_target(url="https://app.example.com"), base_env={})
+    assert env["DASTGATE_TARGET_SCOPE_REGEX"] == r"https://app\.example\.com.*"
+
+
 def test_zap_build_command():
     cmd = zap.build_command(Path("/plans/zap-baseline.yaml"))
     assert cmd == ["zap.sh", "-cmd", "-autorun", "/plans/zap-baseline.yaml"]

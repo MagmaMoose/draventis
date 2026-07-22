@@ -80,6 +80,10 @@ schedules:
     cron: "0 4 * * 0" # 04:00 Sunday — full active, staging only
     activeDeadlineSeconds: 10800
 concurrencyPolicy: Forbid
+# Bound how late a missed run may still start. Without this, a CronJob with
+# concurrencyPolicy: Forbid that misses >100 starts (e.g. controller downtime)
+# hits the "too many missed start times" lockup and stops scheduling for good.
+startingDeadlineSeconds: 300
 successfulJobsHistoryLimit: 3
 failedJobsHistoryLimit: 3
 

@@ -10,13 +10,21 @@ merge-base diff.
 
 from __future__ import annotations
 
+import json
 import urllib.error
 import urllib.request
 import uuid
 from dataclasses import dataclass
 from pathlib import Path
 
+from . import __version__
+
 _CRLF = b"\r\n"
+
+# A real User-Agent: the urllib default ("Python-urllib/X.Y") is commonly banned
+# by edge WAFs by client signature (e.g. Cloudflare Bot Fight Mode, error 1010),
+# which would silently 403 every upload.
+_USER_AGENT = f"dastgate/{__version__} (+https://github.com/MagmaMoose/dastgate)"
 
 
 @dataclass(slots=True)
@@ -26,6 +34,21 @@ class ReimportResult:
     ok: bool
     status: int | None = None
     error: str | None = None
+    url: str | None = None  # link to the imported DefectDojo Test, when parseable
+
+
+def _test_url(base_url: str, body: bytes) -> str | None:
+    """Build a link to the imported Test from the reimport response, if present."""
+    try:
+        data = json.loads(body.decode("utf-8"))
+    except (ValueError, UnicodeDecodeError):
+        return None
+    if not isinstance(data, dict):
+        return None
+    test_id = data.get("test_id") or data.get("test")
+    if test_id is None:
+        return None
+    return f"{base_url.rstrip('/')}/test/{test_id}"
 
 
 def build_multipart(
@@ -88,7 +111,7 @@ def reimport(
     product_type: str | None = None,
     auto_create_context: bool = True,
     close_old_findings: bool = True,
-    timeout: int = 60,
+    timeout: int = 300,
     opener: urllib.request.OpenerDirector | None = None,
 ) -> ReimportResult:
     """POST a scan report to ``/api/v2/reimport-scan/``.
@@ -135,13 +158,28 @@ def reimport(
         headers={
             "Authorization": f"Token {token}",
             "Content-Type": f"multipart/form-data; boundary={boundary}",
+            "User-Agent": _USER_AGENT,
         },
     )
     do_open = opener.open if opener is not None else urllib.request.urlopen
     try:
         with do_open(request, timeout=timeout) as resp:
-            return ReimportResult(ok=True, status=getattr(resp, "status", 200))
+            status = getattr(resp, "status", 200)
+            try:
+                payload = resp.read()
+            except Exception:
+                payload = b""
+            return ReimportResult(ok=True, status=status, url=_test_url(base_url, payload))
     except urllib.error.HTTPError as exc:
-        return ReimportResult(ok=False, status=exc.code, error=f"HTTP {exc.code}: {exc.reason}")
+        # Surface DefectDojo's actual validation message (in the response body),
+        # not just the generic reason phrase, so a failed nightly is diagnosable.
+        detail = ""
+        try:
+            if exc.fp is not None:
+                detail = exc.read().decode("utf-8", errors="replace")[:500]
+        except Exception:
+            detail = ""
+        message = f"HTTP {exc.code}: {detail or exc.reason}"
+        return ReimportResult(ok=False, status=exc.code, error=message)
     except Exception as exc:  # failure isolation is the whole point
         return ReimportResult(ok=False, error=str(exc))
