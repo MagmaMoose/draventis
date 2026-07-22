@@ -1,123 +1,153 @@
 # =============================================================================
-# dastgate — Helm values (Phase 0 scaffold)
+# dastgate — Helm values
 #
-# STUB VALUES. This chart has no templates yet; nothing below is consumed by a
-# running CronJob. Shapes are indicative of the intended design (see
-# ../../docs/DESIGN.md §5.3 / §5.6) and WILL change before first deploy.
-# Do NOT point this at a real environment expecting it to scan.
+# Scheduled DAST (OWASP ZAP + Nuclei) against already-deployed targets, with
+# results reimported into DefectDojo. Override the sections you need; the
+# defaults install cleanly on any cluster (they just scan example.com passively
+# and upload nowhere until you set defectDojo.url).
 # =============================================================================
 
-# Global image pull settings (Phase 0 placeholder).
-imagePullSecrets: []
 nameOverride: ""
 fullnameOverride: ""
 
-# --- dastgate scanner image ---------------------------------------------------
-# Planned: FROM zaproxy/zaproxy:stable (ZAP + JRE + headless browsers for
-# browser-based OIDC auth) + the nuclei binary + the python `dastgate` package.
-# Pinned to 0.0.0 — no image is published yet.
+# --- Scanner image ------------------------------------------------------------
+# The published image bundles ZAP + headless browsers + Nuclei + the dastgate
+# CLI (see the repo Dockerfile). Point `repository` at your own registry if you
+# build it yourself.
 image:
   repository: ghcr.io/magmamoose/dastgate
-  tag: "0.0.0" # Phase 0: no release built yet
+  tag: "" # defaults to the chart appVersion
   pullPolicy: IfNotPresent
+  pullSecrets: []
 
 # --- Targets ------------------------------------------------------------------
-# Source of truth is the `dastgate-targets` key in OCI Vault, mounted by ESO as
-# targets.yaml (see externalSecrets below). The list here is an INLINE EXAMPLE
-# only, to document the shape — expect it to be supplied by the secret, not
-# hard-coded in values.
-#   policy: baseline (passive, prod-safe) | full (active, staging only) | api
+# The list of hosts/services to scan. Rendered into targets.yaml (a ConfigMap)
+# and mounted at /config/targets.yaml. Replace with your own targets.
+#   policy:   baseline (passive, prod-safe) | full (active, staging ONLY) | api
+#   schedule: nightly | weekly  -> which CronJob runs it
 targets:
-  - name: dojo
-    product: magmamoose/defectdojo
-    url: https://defectdojo.magmamoose.com
-    policy: baseline # passive only — the crawl-phase dog-food target
+  - name: example
+    url: https://example.com
+    policy: baseline
     schedule: nightly
   # - name: app-staging
-  #   product: magmamoose/app
-  #   url: https://app.staging.magmamoose.com
-  #   policy: full            # active scan allowed (staging)
-  #   openapi: https://app.staging.magmamoose.com/openapi.json
-  #   auth:
-  #     type: browser-oidc     # authentik / oauth2-proxy
-  #     login_url: https://app.staging.magmamoose.com/login
-  #     user_ref: dastgate-app-staging-user
+  #   url: https://app.staging.example.com
+  #   product: example/app          # DefectDojo product name (defaults to name)
+  #   policy: full                   # active scan — staging only!
   #   schedule: weekly
+  #   openapi: https://app.staging.example.com/openapi.json
+  #   auth:
+  #     type: browser-oidc           # drive a real OIDC login headlessly
+  #     login_url: https://app.staging.example.com/login
+  #     user_env: ZAP_USER           # creds come from the Secret (below)
+  #     pass_env: ZAP_PASS
 
-# --- Schedules ----------------------------------------------------------------
-# Two CronJobs are planned: a nightly passive baseline (+ Nuclei) and a weekly
-# full-active run against staging only. concurrencyPolicy Forbid, with an
-# activeDeadlineSeconds cap so a hung scan cannot run forever.
-schedules:
-  nightly:
-    enabled: true
-    cron: "0 3 * * *" # 03:00 — passive baseline on prod-facing + staging
-    activeDeadlineSeconds: 5400
-  weekly:
-    enabled: false # Phase 0: off until auth + staging active scanning land
-    cron: "0 4 * * 0" # 04:00 Sunday — full active, staging only
-    activeDeadlineSeconds: 10800
-concurrencyPolicy: Forbid
+# --- Config defaults ----------------------------------------------------------
+# Applied to every target that does not set the field itself.
+defaults:
+  policy: baseline
+  schedule: nightly
+  tags:
+    - dast
 
 # --- DefectDojo sink ----------------------------------------------------------
-# Presence of `url` enables the sink (same "sink enabled by host-URL presence"
-# rule chargate uses). The API token comes from ESO, never values.
+# The sink is enabled by the presence of `url`. Leave it empty to run scans
+# without uploading. The API token is a SECRET (see secret.defectDojoToken),
+# never set here.
 defectDojo:
-  url: https://defectdojo.magmamoose.com
-  productType: "MagmaMoose" # DefectDojo product-type grouping for DAST products
-  engagementPrefix: "DAST — "
+  url: "" # e.g. https://defectdojo.example.com
+  productType: "" # optional DefectDojo product-type grouping
+  engagementPrefix: "DAST - "
   autoCreateContext: true # DefectDojo creates product/engagement/test on first run
   closeOldFindings: true # fixed alerts auto-mitigate per engagement
   tags:
     - dast
 
 # --- Nuclei -------------------------------------------------------------------
-# Complementary fast templated scanner. Toggle off for the crawl phase (ZAP
-# baseline only); turned on in the walk phase.
+# The fast templated complement to ZAP. `-dast` fuzzing is enabled automatically
+# only for non-baseline (staging) targets.
 nuclei:
-  enabled: false # Phase 0: ZAP baseline first, Nuclei added in the walk phase
-  image:
-    repository: projectdiscovery/nuclei
-    tag: "" # Phase 0: unset — pin at adoption time
-  dast: false # `-dast` fuzzing is staging-only, run phase
+  enabled: false
 
-# --- External Secrets Operator (OCI Vault) ------------------------------------
-# ESO materialises the targets list, DefectDojo token, and per-target scan creds
-# from OCI Vault. Refs below are placeholders for Phase 0.
-externalSecrets:
-  enabled: false # Phase 0: not wired until the first real deploy
+# --- Schedules -> CronJobs ----------------------------------------------------
+schedules:
+  nightly:
+    enabled: true
+    cron: "0 3 * * *" # 03:00 daily — passive baseline (+ Nuclei if enabled)
+    activeDeadlineSeconds: 5400
+  weekly:
+    enabled: false # turn on once you have staging targets + auth wired
+    cron: "0 4 * * 0" # 04:00 Sunday — full active, staging only
+    activeDeadlineSeconds: 10800
+concurrencyPolicy: Forbid
+# Bound how late a missed run may still start. Without this, a CronJob with
+# concurrencyPolicy: Forbid that misses >100 starts (e.g. controller downtime)
+# hits the "too many missed start times" lockup and stops scheduling for good.
+startingDeadlineSeconds: 300
+successfulJobsHistoryLimit: 3
+failedJobsHistoryLimit: 3
+
+# --- Secrets ------------------------------------------------------------------
+# Two mutually exclusive backends. By default the chart creates a plain Secret
+# from the values here — works on any cluster. Provide these via `helm install
+# --set` / a values file / `--set-file`, not by committing them.
+secret:
+  defectDojoToken: "" # DefectDojo API token (env DEFECTDOJO_TOKEN)
+  # Extra env vars for authenticated scans, e.g. per-target ZAP creds:
+  env: {}
+  #   ZAP_USER: scanbot
+  #   ZAP_PASS: change-me
+
+# Optional: source secrets from External Secrets Operator instead of the plain
+# Secret above (Vault / AWS / GCP / Azure / OCI ...). When enabled, the chart
+# emits an ExternalSecret and does NOT template the values under `secret`.
+# Requires External Secrets Operator >= v0.10 (uses the external-secrets.io/v1
+# API; v1beta1 was removed in ESO v0.17).
+externalSecret:
+  enabled: false
   secretStoreRef:
-    name: oci-vault
+    name: "" # e.g. cluster-secret-store
     kind: ClusterSecretStore
   refreshInterval: "1h"
-  # OCI Vault keys → k8s Secret keys the CronJob mounts / envs from.
-  data:
-    - secretKey: targets.yaml # mounted file — the targets list
-      remoteRef: dastgate-targets
-    - secretKey: DEFECTDOJO_TOKEN # env — reimport-scan auth
-      remoteRef: dastgate-defectdojo-token
-    # - secretKey: ZAP_USER        # env — per-target authentik scanbot user
-    #   remoteRef: dastgate-app-staging-user
-    # - secretKey: ZAP_PASS
-    #   remoteRef: dastgate-app-staging-pass
+  # Map remote store keys -> the env keys dastgate expects (DEFECTDOJO_TOKEN,
+  # ZAP_*). See docs/deployment.md for a worked example.
+  data: []
 
-# --- Pod scheduling / hardening ----------------------------------------------
-# Heavy scan pods pinned to the worker node; CPU requests only, no limits (node
-# convention). Minimal ServiceAccount — dastgate needs NO cluster API access
-# (it only talks HTTP to targets + DefectDojo).
+# --- ServiceAccount -----------------------------------------------------------
+# dastgate needs NO Kubernetes API access, so the account has no RBAC and does
+# not mount a token.
 serviceAccount:
   create: true
   name: ""
-nodeSelector:
-  role: worker
+  annotations: {}
+
+# --- Pod / container hardening ------------------------------------------------
+podSecurityContext:
+  runAsNonRoot: true
+  # No runAsUser here on purpose: the image declares a numeric non-root user
+  # (USER 1000:1000 in the Dockerfile), which is what lets the kubelet verify
+  # runAsNonRoot. If you override `image` with one that uses a NON-numeric USER,
+  # set runAsUser to that image's numeric UID or the pod won't start.
+  fsGroup: 1000 # gid 1000 owns the /zap/wrk emptyDir
+  seccompProfile:
+    type: RuntimeDefault
+securityContext:
+  allowPrivilegeEscalation: false
+  readOnlyRootFilesystem: false # ZAP writes to /zap/wrk (mounted emptyDir)
+  capabilities:
+    drop:
+      - ALL
+
 resources:
   requests:
     cpu: "500m"
     memory: "1Gi"
-  # No CPU/memory limits by node convention.
-securityContext:
-  runAsNonRoot: true
-  seccompProfile:
-    type: RuntimeDefault
+  limits:
+    # Generous memory ceiling so a runaway scan can't pressure the node. No CPU
+    # limit — scans are bursty and CPU throttling only slows them. Raise for
+    # large active scans.
+    memory: "4Gi"
+
+nodeSelector: {}
 tolerations: []
 affinity: {}

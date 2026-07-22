@@ -1,0 +1,72 @@
+# ---------------------------------------------------------------------------
+# ZAP Automation Framework plan: full active scan.
+#
+# Baseline + ajax-spider + ACTIVE attacks. This sends attack payloads and can
+# create/modify/delete data, so it is DESTRUCTIVE. Only point it at a
+# non-production (staging) target — never at production.
+#
+# The target comes from ${DASTGATE_TARGET_URL}; for authenticated targets,
+# ${DASTGATE_LOGIN_URL}, ${ZAP_USER} and ${ZAP_PASS} are populated from the
+# environment (a mounted Secret). All values come from config you control —
+# never from a scanned response.
+#
+# Run:  zap.sh -cmd -autorun /path/to/full-active.yaml
+# Produces /zap/wrk/zap-full.xml -> reimport into DefectDojo as "ZAP Scan".
+# ---------------------------------------------------------------------------
+
+env:
+  contexts:
+    - name: active-target
+      urls:
+        - "${DASTGATE_TARGET_URL}"
+      includePaths:
+        # Pre-escaped regex (dots in the host are literal, not wildcards).
+        - "${DASTGATE_TARGET_SCOPE_REGEX}"
+      excludePaths:
+        - ".*/logout.*"
+        - ".*/admin/delete.*" # avoid obviously destructive routes
+  parameters:
+    failOnError: true
+    failOnWarning: false
+    progressToStdout: true
+
+jobs:
+  - type: passiveScan-config
+    parameters:
+      enableTags: false
+      scanOnlyInScope: true
+
+  - type: spider
+    parameters:
+      context: active-target
+      maxDuration: 5
+      maxDepth: 10
+      maxChildren: 0
+
+  # Ajax (browser) spider for JS-heavy apps — active traversal, staging only.
+  - type: spiderAjax
+    parameters:
+      context: active-target
+      maxDuration: 5
+
+  - type: passiveScan-wait
+    parameters:
+      maxDuration: 10
+
+  # ACTIVE attacks. Staging only.
+  - type: activeScan
+    parameters:
+      context: active-target
+      maxRuleDurationInMins: 5
+      maxScanDurationInMins: 60
+
+  # Engine-level false-positive suppression lives here (versioned, reviewable).
+  - type: alertFilter
+    parameters:
+      alertFilters: []
+
+  - type: report
+    parameters:
+      template: traditional-xml
+      reportDir: /zap/wrk
+      reportFile: zap-full.xml

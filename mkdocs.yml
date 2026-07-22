@@ -1,0 +1,47 @@
+site_name: dastgate
+site_description: Scheduled DAST (OWASP ZAP + Nuclei) for Kubernetes, reimported into DefectDojo.
+repo_url: https://github.com/MagmaMoose/dastgate
+repo_name: MagmaMoose/dastgate
+docs_dir: docs
+
+theme:
+  name: material
+  palette:
+    - media: "(prefers-color-scheme: light)"
+      scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-night
+        name: Switch to dark mode
+    - media: "(prefers-color-scheme: dark)"
+      scheme: slate
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/weather-sunny
+        name: Switch to light mode
+  features:
+    - navigation.instant
+    - navigation.top
+    - content.code.copy
+    - toc.follow
+
+nav:
+  - Home: index.md
+  - Setup: setup.md
+  - Deployment: deployment.md
+  - Configuration: configuration.md
+  - Architecture: architecture.md
+  - Design: design.md
+
+markdown_extensions:
+  - admonition
+  - pymdownx.superfences
+  - toc:
+      permalink: true
+
+extra:
+  social:
+    - icon: fontawesome/brands/github
+      link: https://github.com/MagmaMoose/dastgate

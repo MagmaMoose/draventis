@@ -1,0 +1,45 @@
+# Example dastgate config. Copy it and edit:
+#
+#   cp targets.example.yaml targets.local.yaml
+#   uv run dastgate run --all --config targets.local.yaml --dry-run
+#
+# targets.local.yaml is gitignored, so your real hosts never get committed.
+# Full reference: docs/configuration.md
+
+defaults:
+  policy: baseline # baseline (passive, prod-safe) | full (active, staging only) | api
+  schedule: nightly # nightly | weekly
+  tags:
+    - dast
+
+# The reimport sink. Enabled by the presence of a url; the token comes from the
+# DEFECTDOJO_TOKEN environment variable, never this file.
+defectdojo:
+  url: https://defectdojo.example.com
+  engagement_prefix: "DAST - "
+  auto_create_context: true
+  close_old_findings: true
+  tags:
+    - dast
+
+nuclei:
+  enabled: false
+
+targets:
+  - name: my-site
+    url: https://my-site.example.com
+    policy: baseline
+    schedule: nightly
+
+  # Active scan of a staging app behind OIDC (credentials via env, see auth.*_env):
+  # - name: app-staging
+  #   url: https://app.staging.example.com
+  #   product: myorg/app
+  #   policy: full            # active — staging ONLY
+  #   schedule: weekly
+  #   openapi: https://app.staging.example.com/openapi.json
+  #   auth:
+  #     type: browser-oidc
+  #     login_url: https://app.staging.example.com/login
+  #     user_env: ZAP_USER
+  #     pass_env: ZAP_PASS

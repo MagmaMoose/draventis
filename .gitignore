@@ -41,6 +41,13 @@ output/
 targets.local.yaml
 secrets/
 
+# --- Docs (MkDocs) ---
+/site/
+
+# --- Claude Code scratch ---
+.claude/last_output.txt
+.claude/sessions/*.local.md
+
 # --- Editors / OS ---
 .idea/
 .vscode/

@@ -1,15 +1,14 @@
 apiVersion: v2
 name: dastgate
 description: >-
-  Scheduled DAST (OWASP ZAP by Checkmarx via the Automation Framework + Nuclei)
-  against deployed/staging environments, reimported into DefectDojo. Phase 0
-  scaffold — stub chart, not yet deployable.
+  Scheduled DAST (OWASP ZAP via the Automation Framework + Nuclei) against
+  already-deployed targets, with results reimported into DefectDojo. Installs as
+  one or more Kubernetes CronJobs.
 type: application
 
-# Phase 0 scaffold: the chart is a stub. `version` is the chart version;
-# `appVersion` is pinned to 0.0.0 until the dastgate image ships a real release.
-version: 0.1.0
-appVersion: "0.0.0"
+# `version` is the chart version; `appVersion` tracks the dastgate image release.
+version: 0.2.0
+appVersion: "0.1.0"
 
 keywords:
   - dast

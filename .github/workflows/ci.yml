@@ -1,0 +1,49 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  python:
+    name: lint + test
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - name: Ruff
+        run: uv run ruff check src tests
+      - name: Pytest
+        run: uv run --with pyyaml --with pytest pytest -q
+
+  chart:
+    name: helm lint + template
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - name: Install Helm
+        run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
+      - name: Helm lint
+        run: helm lint charts/dastgate
+      - name: Helm template (default + toggles)
+        run: |
+          helm template dg charts/dastgate >/dev/null
+          helm template dg charts/dastgate \
+            --set schedules.weekly.enabled=true \
+            --set externalSecret.enabled=true \
+            --set externalSecret.secretStoreRef.name=store \
+            --set nuclei.enabled=true >/dev/null
+
+  docs:
+    name: mkdocs build
+    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: astral-sh/setup-uv@c771a70e6277c0a99b617c7a806ffedaca235ff9 # v9.0.0
+      - name: Build docs
+        run: uv run --with mkdocs-material mkdocs build --strict

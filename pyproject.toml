@@ -1,24 +1,31 @@
-# dastgate — Phase 0 scaffold.
+# dastgate — Python package metadata.
 #
-# This is a *seed* project file. The package under `src/dastgate/` is an empty,
-# version 0.0.0 shell (no working code yet). The scripts entry and tooling config
-# below describe the *intended* shape from docs/DESIGN.md (§5.1) so later phases have
-# a real base to build against — they do not imply the tool exists yet. See
-# "Status: Planning (Phase 0)" in README.md.
+# The DefectDojo client is stdlib `urllib` (no HTTP deps); the scan engines (ZAP,
+# Nuclei) run as pinned binaries in the container image, not as Python deps. The
+# only runtime dependency is a YAML parser for `targets.yaml`.
 [project]
 name = "dastgate"
-version = "0.0.0"
+version = "0.1.0"
 description = "Scheduled DAST (OWASP ZAP + Nuclei) against deployed environments, reimported into DefectDojo."
 readme = "README.md"
 requires-python = ">=3.11"
 license = "MIT"
 authors = [{ name = "Caleb Sargeant", email = "caleb@magmamoose.com" }]
-keywords = ["security", "dast", "zap", "nuclei", "defectdojo", "sarif"]
-# Intended to mirror chargate's uploader ethos: a stdlib-`urllib` DefectDojo client
-# (no runtime deps in the core). The scan engines (ZAP, Nuclei) run as pinned
-# binaries in the container, not as Python deps. A YAML parser for `targets.yaml`
-# is the one likely runtime dep to be pinned when config.py lands (see DESIGN §5.3).
-dependencies = []
+keywords = ["security", "dast", "zap", "nuclei", "defectdojo", "cronjob", "helm"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "Intended Audience :: System Administrators",
+    "Topic :: Security",
+    "Topic :: Software Development :: Quality Assurance",
+    "Programming Language :: Python :: 3 :: Only",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Programming Language :: Python :: 3.13",
+    "Operating System :: OS Independent",
+]
+dependencies = ["PyYAML>=6"]
 
 [project.scripts]
 dastgate = "dastgate.__main__:main"
@@ -26,6 +33,9 @@ dastgate = "dastgate.__main__:main"
 [project.urls]
 Homepage = "https://github.com/MagmaMoose/dastgate"
 Source = "https://github.com/MagmaMoose/dastgate"
+Documentation = "https://github.com/MagmaMoose/dastgate/tree/main/docs"
+Issues = "https://github.com/MagmaMoose/dastgate/issues"
+Changelog = "https://github.com/MagmaMoose/dastgate/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
