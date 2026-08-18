@@ -23,28 +23,20 @@ permissions:
 
 jobs:
   chargate:
-    # Per-repo runner toggle, shared with the release (Diatreme) workflow.
-    # Set the SELFHOSTED_GITHUB_RUNNER variable to a self-hosted runner label
-    # to route this repo's managed workflows to a cluster pool — free minutes
-    # and a warm MegaLinter image. Leave it unset/blank to stay on
-    # GitHub-hosted; blanking it is also the instant escape hatch if the
+    # Runner routing, rendered by visibility — see `template_vars` at the top of
+    # settings.yml. `runs_on_amd64`, NOT `runs_on`: Chargate is amd64-only in
+    # practice (arm64 runs MegaLinter's per-linter images sequentially and the job
+    # never finishes — see the note on the var). Public repos get a literal
+    # `ubuntu-latest` (GitHub-hosted minutes are free on public repos, and this
+    # keeps them out of the self-hosted queue); private/internal repos get the
+    # amd64-pinned expression,
+    # so blanking that variable is still the instant escape hatch if the
     # self-hosted runners bomb out.
-    runs-on: ${{ vars.SELFHOSTED_GITHUB_RUNNER || 'ubuntu-latest' }}
+    runs-on: ubuntu-latest
     steps:
-      - uses: magmamoose/chargate@2969cda6eddef2e4a2cd195eb21d40d4d1345300 # v2.9.0
+      - uses: magmamoose/chargate@13239654c6395322b0698720f0f7cfc4c2f7e40e # v2.11.10
         with:
-          # Gate on net-new high+ (default is `any`). This repo ships a Helm
-          # chart scanned by KICS, which emits findings that can't be satisfied
-          # for a scanner built on the ZAP base image or resolved in a
-          # distributable app chart:
-          #   - the sole medium (runAsUser) demands UID >= 10000, but the ZAP
-          #     base image owns its files as uid 1000, so a high UID breaks it;
-          #   - a floor of low/none structural findings (no LimitRange/
-          #     ResourceQuota, user-configurable image ref so no digest, envFrom
-          #     secrets, ZAP's writable-rootfs need).
-          # Real high/critical issues still block.
-          fail_on: high
           defectdojo_url: ${{ vars.MM_DEFECTDOJO_URL }}
           defectdojo_token: ${{ secrets.MM_DEFECTDOJO_API_KEY }}
           dependency_track_url: ${{ vars.MM_DEPENDENCY_TRACK_URL }}
-          dependency_track_token: ${{ secrets.MM_DEPENDENCY_TRACK_API_KEY }}
+          dependency_track_api_key: ${{ secrets.MM_DEPENDENCY_TRACK_API_KEY }}
