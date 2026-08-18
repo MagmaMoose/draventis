@@ -7,7 +7,7 @@ labels: enhancement
 
 ## Problem
 
-<!-- What are you trying to do that dastgate doesn't support today? -->
+<!-- What are you trying to do that draventis doesn't support today? -->
 
 ## Proposed solution
 

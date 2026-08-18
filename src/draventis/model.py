@@ -1,4 +1,4 @@
-"""Typed configuration model for dastgate.
+"""Typed configuration model for draventis.
 
 These dataclasses are the in-memory shape of ``targets.yaml`` (see
 ``config.load_config``). They are deliberately dependency-free (stdlib only) so

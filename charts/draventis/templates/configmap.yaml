@@ -6,10 +6,10 @@ NOT here — they come from the Secret / ExternalSecret via envFrom.
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ include "dastgate.fullname" . }}-config
+  name: {{ include "draventis.fullname" . }}-config
   namespace: {{ .Release.Namespace }}
   labels:
-    {{- include "dastgate.labels" . | nindent 4 }}
+    {{- include "draventis.labels" . | nindent 4 }}
 data:
   targets.yaml: |
     {{- with .Values.defaults }}

@@ -1,4 +1,4 @@
-"""Load and validate ``targets.yaml`` into the typed :mod:`dastgate.model`.
+"""Load and validate ``targets.yaml`` into the typed :mod:`draventis.model`.
 
 The config file is the single source of truth for *what* to scan. In a cluster
 it is supplied as a mounted file (a plain Kubernetes Secret by default, or
@@ -46,7 +46,7 @@ def _load_yaml(text: str) -> Any:
         import yaml  # optional dep, imported lazily
     except ModuleNotFoundError as exc:  # pragma: no cover - env-specific
         raise ConfigError(
-            "PyYAML is required to read YAML config; install dastgate with its "
+            "PyYAML is required to read YAML config; install draventis with its "
             "runtime dependencies, or supply the config as JSON."
         ) from exc
     try:

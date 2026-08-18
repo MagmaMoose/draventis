@@ -8,7 +8,7 @@
 
 - [ ] `uv run ruff check .` passes
 - [ ] `uv run pytest -q` passes
-- [ ] `helm lint charts/dastgate` passes (if the chart changed)
+- [ ] `helm lint charts/draventis` passes (if the chart changed)
 - [ ] Docs updated (`docs/`) for any behaviour/config/setup change
 - [ ] No secrets, tokens, or real hostnames committed
 - [ ] External GitHub Actions pinned by commit SHA with a `# vX.Y.Z` comment

@@ -1,10 +1,10 @@
-# dastgate — Python package metadata.
+# draventis — Python package metadata.
 #
 # The DefectDojo client is stdlib `urllib` (no HTTP deps); the scan engines (ZAP,
 # Nuclei) run as pinned binaries in the container image, not as Python deps. The
 # only runtime dependency is a YAML parser for `targets.yaml`.
 [project]
-name = "dastgate"
+name = "draventis"
 version = "0.1.0"
 description = "Scheduled DAST (OWASP ZAP + Nuclei) against deployed environments, reimported into DefectDojo."
 readme = "README.md"
@@ -28,21 +28,21 @@ classifiers = [
 dependencies = ["PyYAML>=6"]
 
 [project.scripts]
-dastgate = "dastgate.__main__:main"
+draventis = "draventis.__main__:main"
 
 [project.urls]
-Homepage = "https://github.com/MagmaMoose/dastgate"
-Source = "https://github.com/MagmaMoose/dastgate"
-Documentation = "https://github.com/MagmaMoose/dastgate/tree/main/docs"
-Issues = "https://github.com/MagmaMoose/dastgate/issues"
-Changelog = "https://github.com/MagmaMoose/dastgate/blob/main/CHANGELOG.md"
+Homepage = "https://github.com/MagmaMoose/draventis"
+Source = "https://github.com/MagmaMoose/draventis"
+Documentation = "https://github.com/MagmaMoose/draventis/tree/main/docs"
+Issues = "https://github.com/MagmaMoose/draventis/issues"
+Changelog = "https://github.com/MagmaMoose/draventis/blob/main/CHANGELOG.md"
 
 [build-system]
 requires = ["hatchling"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
-packages = ["src/dastgate"]
+packages = ["src/draventis"]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]
@@ -67,8 +67,8 @@ addopts = "-ra"
 [tool.semantic_release]
 version_toml = ["pyproject.toml:project.version"]
 version_variables = [
-    "src/dastgate/__init__.py:__version__",
-    "charts/dastgate/Chart.yaml:appVersion",
+    "src/draventis/__init__.py:__version__",
+    "charts/draventis/Chart.yaml:appVersion",
 ]
 allow_zero_version = true  # stay on 0.x (project is alpha); first release is 0.1.0
 major_on_zero = false      # breaking changes stay on 0.x until we're ready for 1.0

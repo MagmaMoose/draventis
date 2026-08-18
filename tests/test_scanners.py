@@ -2,8 +2,8 @@ from __future__ import annotations
 
 from pathlib import Path
 
-from dastgate import nuclei, zap
-from dastgate.model import AuthProfile, ScanPolicy, Target
+from draventis import nuclei, zap
+from draventis.model import AuthProfile, ScanPolicy, Target
 
 
 def _target(**kw) -> Target:
@@ -24,16 +24,16 @@ def test_build_env_exports_target_and_auth():
         auth=AuthProfile(type="browser-oidc", login_url="https://app.example.com/login"),
     )
     env = zap.build_env(t, base_env={"PATH": "/usr/bin"})
-    assert env["DASTGATE_TARGET_URL"] == "https://app.example.com"
-    assert env["DASTGATE_OPENAPI_URL"].endswith("/openapi.json")
-    assert env["DASTGATE_LOGIN_URL"].endswith("/login")
+    assert env["DRAVENTIS_TARGET_URL"] == "https://app.example.com"
+    assert env["DRAVENTIS_OPENAPI_URL"].endswith("/openapi.json")
+    assert env["DRAVENTIS_LOGIN_URL"].endswith("/login")
     assert env["PATH"] == "/usr/bin"  # base env preserved
 
 
 def test_build_env_scope_regex_escapes_dots():
     # includePaths are regexes; the host's dots must be literal, not wildcards.
     env = zap.build_env(_target(url="https://app.example.com"), base_env={})
-    assert env["DASTGATE_TARGET_SCOPE_REGEX"] == r"https://app\.example\.com.*"
+    assert env["DRAVENTIS_TARGET_SCOPE_REGEX"] == r"https://app\.example\.com.*"
 
 
 def test_zap_build_command():
@@ -65,7 +65,7 @@ def test_zap_run_scan_invokes_runner():
 
     def runner(command, env):
         seen["command"] = command
-        seen["url"] = env["DASTGATE_TARGET_URL"]
+        seen["url"] = env["DRAVENTIS_TARGET_URL"]
         return 0
 
     art = zap.run_scan(

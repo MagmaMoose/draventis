@@ -1,6 +1,6 @@
 # Design
 
-Why dastgate is shaped the way it is. This is the reasoning behind the code, not
+Why draventis is shaped the way it is. This is the reasoning behind the code, not
 a how-to (see [Deployment](deployment.md) and [Configuration](configuration.md)
 for that).
 
@@ -15,7 +15,7 @@ for that).
 - **DAST runs as a scheduled CronJob**, not in CI on a PR, because DAST needs a
   **running target**. Your cluster already runs your apps; scan those.
 - **Baseline into DefectDojo, not diff-gated.** DAST is non-deterministic and has
-  no merge-base to diff against, so dastgate does not try to be a PR gate. It
+  no merge-base to diff against, so draventis does not try to be a PR gate. It
   reimports on a schedule and lets DefectDojo compute drift (see below).
 - **Non-destructive by default.** `baseline` (passive) is safe against
   production; `full`/`api` (active) must target staging only.
@@ -54,10 +54,10 @@ you can reproduce with the Automation Framework + your own DefectDojo hub.
 ### ZAP scan modes
 
 The Automation Framework (a single declarative YAML plan) is the standard for
-every dastgate job; it replaced the old `zap-baseline`/`zap-full-scan` shell
-entry points. dastgate ships one plan per policy in [`automation/`](https://github.com/MagmaMoose/dastgate/tree/main/automation):
+every draventis job; it replaced the old `zap-baseline`/`zap-full-scan` shell
+entry points. draventis ships one plan per policy in [`automation/`](https://github.com/MagmaMoose/draventis/tree/main/automation):
 
-| Plan | Jobs | dastgate policy |
+| Plan | Jobs | draventis policy |
 |---|---|---|
 | `zap-baseline.yaml` | spider + passive | `baseline`: nightly, prod-safe |
 | `full-active.yaml` | + ajax-spider + active | `full`: weekly, staging only |
@@ -65,7 +65,7 @@ entry points. dastgate ships one plan per policy in [`automation/`](https://gith
 
 ## DefectDojo ingestion
 
-dastgate POSTs each report to **`POST /api/v2/reimport-scan/`** (multipart form)
+draventis POSTs each report to **`POST /api/v2/reimport-scan/`** (multipart form)
 with:
 
 - `scan_type` = `"ZAP Scan"` / `"Nuclei Scan"`
@@ -114,7 +114,7 @@ cost.
 
 ## Authenticated scanning
 
-Most apps behind an OIDC proxy need dastgate to authenticate. Do both:
+Most apps behind an OIDC proxy need draventis to authenticate. Do both:
 
 1. **Scan behind the proxy** (app-layer bugs): ZAP Browser-Based Authentication
    drives the real OIDC login in a headless browser and uses a poll-based
@@ -152,16 +152,16 @@ merge-base diff.
 ## Container & hardening
 
 The image builds on the official ZAP image (ZAP + JRE + headless browsers for
-browser-based auth) plus the Nuclei binary and the `dastgate` package. It runs
+browser-based auth) plus the Nuclei binary and the `draventis` package. It runs
 **non-root** with `seccompProfile: RuntimeDefault` and all capabilities dropped;
-only `/zap/wrk` (an `emptyDir`) is writable. dastgate needs **no Kubernetes API
+only `/zap/wrk` (an `emptyDir`) is writable. draventis needs **no Kubernetes API
 access** (it only makes HTTP requests to targets and DefectDojo), so its
 ServiceAccount has no RBAC and does not mount a token: a deliberately minimal
 blast radius.
 
 ## Rollout (crawl / walk / run)
 
-A safe way to adopt dastgate incrementally:
+A safe way to adopt draventis incrementally:
 
 - **Crawl**: one nightly `baseline` target against a safe host; prove the ZAP
   reimport pipe lands in DefectDojo with `auto_create_context`.

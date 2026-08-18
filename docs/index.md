@@ -1,4 +1,4 @@
-# dastgate
+# draventis
 
 Scheduled **DAST** (Dynamic Application Security Testing) for Kubernetes:
 [OWASP ZAP](https://www.zaproxy.org/) (via the ZAP Automation Framework) +
@@ -10,13 +10,13 @@ Deploy it to any cluster with Helm, point it at your URLs, and it does the rest.
 
 ## What it does
 
-dastgate is an **orchestrator + uploader**. It runs as one or more Kubernetes
+draventis is an **orchestrator + uploader**. It runs as one or more Kubernetes
 CronJobs; on each run it reads `targets.yaml`, scans each target with ZAP (and
 optionally Nuclei), and reimports the reports into DefectDojo.
 
 ```
 CronJob (nightly / weekly)
-  └─ dastgate run --schedule <name>
+  └─ draventis run --schedule <name>
        ├─ for each target: ZAP plan (by policy) → report.xml
        │                    Nuclei (optional)   → report.jsonl
        └─ reimport each report → DefectDojo /api/v2/reimport-scan/

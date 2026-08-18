@@ -5,8 +5,8 @@
 # create/modify/delete data, so it is DESTRUCTIVE. Only point it at a
 # non-production (staging) target — never at production.
 #
-# The target comes from ${DASTGATE_TARGET_URL}; for authenticated targets,
-# ${DASTGATE_LOGIN_URL}, ${ZAP_USER} and ${ZAP_PASS} are populated from the
+# The target comes from ${DRAVENTIS_TARGET_URL}; for authenticated targets,
+# ${DRAVENTIS_LOGIN_URL}, ${ZAP_USER} and ${ZAP_PASS} are populated from the
 # environment (a mounted Secret). All values come from config you control —
 # never from a scanned response.
 #
@@ -18,10 +18,10 @@ env:
   contexts:
     - name: active-target
       urls:
-        - "${DASTGATE_TARGET_URL}"
+        - "${DRAVENTIS_TARGET_URL}"
       includePaths:
         # Pre-escaped regex (dots in the host are literal, not wildcards).
-        - "${DASTGATE_TARGET_SCOPE_REGEX}"
+        - "${DRAVENTIS_TARGET_SCOPE_REGEX}"
       excludePaths:
         - ".*/logout.*"
         - ".*/admin/delete.*" # avoid obviously destructive routes

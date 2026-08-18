@@ -4,7 +4,7 @@
 # Imports an OpenAPI/Swagger spec to seed the site tree, then spiders and ACTIVE
 # scans the described operations. Active, so staging only.
 #
-# ${DASTGATE_TARGET_URL} is the API base URL; ${DASTGATE_OPENAPI_URL} is the spec
+# ${DRAVENTIS_TARGET_URL} is the API base URL; ${DRAVENTIS_OPENAPI_URL} is the spec
 # location (both populated from config / the environment).
 #
 # Run:  zap.sh -cmd -autorun /path/to/api-scan.yaml
@@ -15,10 +15,10 @@ env:
   contexts:
     - name: api-target
       urls:
-        - "${DASTGATE_TARGET_URL}"
+        - "${DRAVENTIS_TARGET_URL}"
       includePaths:
         # Pre-escaped regex (dots in the host are literal, not wildcards).
-        - "${DASTGATE_TARGET_SCOPE_REGEX}"
+        - "${DRAVENTIS_TARGET_SCOPE_REGEX}"
   parameters:
     failOnError: true
     failOnWarning: false
@@ -28,8 +28,8 @@ jobs:
   # Import the spec -> seed the site tree with every documented operation.
   - type: openapi
     parameters:
-      apiUrl: "${DASTGATE_OPENAPI_URL}"
-      targetUrl: "${DASTGATE_TARGET_URL}"
+      apiUrl: "${DRAVENTIS_OPENAPI_URL}"
+      targetUrl: "${DRAVENTIS_TARGET_URL}"
       context: api-target
 
   - type: passiveScan-config
