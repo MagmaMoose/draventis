@@ -1,0 +1,5 @@
+# DS-0026: HEALTHCHECK missing from Dockerfile.
+# This is a batch/CronJob image that runs `draventis run` to completion.
+# Kubernetes tracks the Job's exit status directly; a Docker HEALTHCHECK
+# would be meaningless and is never used by the kubelet for CronJob pods.
+DS-0026

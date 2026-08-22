@@ -1,4 +1,3 @@
-# trivy:ignore:DS-0026
 # draventis scanner image.
 #
 # Built on the official ZAP image (ZAP + JRE + headless browsers for
