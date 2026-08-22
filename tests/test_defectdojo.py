@@ -42,7 +42,7 @@ class _OkOpener:
     def open(self, request, timeout=0):
         assert request.get_header("Authorization") == "Token secret"
         # A real User-Agent must be set (urllib's default is WAF-banned).
-        assert request.get_header("User-agent", "").startswith("draventis/")
+        assert request.get_header("User-agent", "").startswith("draventis/")  # nosec B101
         return _FakeResp()
 
 

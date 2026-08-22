@@ -11,6 +11,7 @@
 # No HEALTHCHECK: this is a batch/CronJob image (runs `draventis run` to
 # completion), not a long-running service. Kubernetes ignores Docker HEALTHCHECK
 # and tracks the Job's exit status instead, so a healthcheck would be meaningless.
+# trivy:ignore:DS-0026
 # kics-scan disable=b03a748a-542d-44f4-bb86-9199ab4fd2d5
 
 # Pinned by digest for reproducible, verifiable builds (this is the multi-arch
