@@ -6,6 +6,17 @@ to follow [Semantic Versioning](https://semver.org/).
 
 ## [Unreleased]
 
+### Changed
+
+- **Renamed `dastgate` → `draventis`.** The `-gate` suffix collided with
+  `chargate` and misdescribed the tool: this runs scheduled scans against
+  deployed environments and reports, it does not gate a pipeline. Renames the
+  Python package (`src/draventis`), the CLI entrypoint, the Helm chart, the
+  image (`ghcr.io/magmamoose/draventis`) and every `DASTGATE_*` environment
+  variable to `DRAVENTIS_*`. No published container image or live deployment
+  existed under the old name, so nothing needs migrating; GitHub redirects the
+  old repository URL.
+
 ## [0.1.0] - 2026-07-22
 
 First working release: dastgate moves out of the Phase 0 scaffold into a real,
@@ -24,5 +35,5 @@ generic, deploy-anywhere project.
   the CLI, pinned by digest and arch-correct.
 - MkDocs documentation site and a unit-test suite.
 
-[Unreleased]: https://github.com/MagmaMoose/dastgate/compare/v0.1.0...HEAD
-[0.1.0]: https://github.com/MagmaMoose/dastgate/releases/tag/v0.1.0
+[Unreleased]: https://github.com/MagmaMoose/draventis/compare/v0.1.0...HEAD
+[0.1.0]: https://github.com/MagmaMoose/draventis/releases/tag/v0.1.0

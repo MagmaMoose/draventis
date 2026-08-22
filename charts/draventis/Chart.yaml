@@ -1,12 +1,12 @@
 apiVersion: v2
-name: dastgate
+name: draventis
 description: >-
   Scheduled DAST (OWASP ZAP via the Automation Framework + Nuclei) against
   already-deployed targets, with results reimported into DefectDojo. Installs as
   one or more Kubernetes CronJobs.
 type: application
 
-# `version` is the chart version; `appVersion` tracks the dastgate image release.
+# `version` is the chart version; `appVersion` tracks the draventis image release.
 version: 0.2.0
 appVersion: "0.1.0"
 
@@ -18,9 +18,9 @@ keywords:
   - defectdojo
   - cronjob
 
-home: https://github.com/MagmaMoose/dastgate
+home: https://github.com/MagmaMoose/draventis
 sources:
-  - https://github.com/MagmaMoose/dastgate
+  - https://github.com/MagmaMoose/draventis
 
 maintainers:
   - name: Caleb Sargeant

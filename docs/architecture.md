@@ -1,6 +1,6 @@
 # Architecture
 
-dastgate is a small Python CLI plus a Helm chart. The CLI is the
+draventis is a small Python CLI plus a Helm chart. The CLI is the
 **orchestrator + uploader**; the scanning is done by external binaries (ZAP,
 Nuclei) that live in the container image.
 
@@ -20,16 +20,16 @@ targets.yaml ──► config.load_config ──► Config (model.py)
 Per-target failures are isolated: one target failing (or one upload failing) does
 not stop the rest.
 
-## Modules (`src/dastgate/`)
+## Modules (`src/draventis/`)
 
 | Module | Responsibility | Runtime deps |
 |---|---|---|
-| [`model.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/model.py) | Typed config dataclasses: `Target`, `AuthProfile`, `DefectDojoConfig`, `Config`, and the `ScanPolicy` / `Schedule` enums. | stdlib only |
-| [`config.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/config.py) | Load & validate `targets.yaml` (or JSON) into a `Config`; apply defaults; reject dupes/missing fields. | PyYAML (lazy) |
-| [`zap.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/zap.py) | Pick the AF plan for a policy, export `${DASTGATE_*}` env, build & run `zap.sh`, return the report path. | stdlib only |
-| [`nuclei.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/nuclei.py) | Build & run the `nuclei` command (JSONL output; `-dast` for non-baseline). | stdlib only |
-| [`defectdojo.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/defectdojo.py) | `reimport-scan` client: build multipart, POST via `urllib`, **failure-isolated**. | stdlib only |
-| [`__main__.py`](https://github.com/MagmaMoose/dastgate/blob/main/src/dastgate/__main__.py) | The `dastgate run` CLI: parse args, select targets, orchestrate scan + upload. | None |
+| [`model.py`](https://github.com/MagmaMoose/draventis/blob/main/src/draventis/model.py) | Typed config dataclasses: `Target`, `AuthProfile`, `DefectDojoConfig`, `Config`, and the `ScanPolicy` / `Schedule` enums. | stdlib only |
+| [`config.py`](https://github.com/MagmaMoose/draventis/blob/main/src/draventis/config.py) | Load & validate `targets.yaml` (or JSON) into a `Config`; apply defaults; reject dupes/missing fields. | PyYAML (lazy) |
+| [`zap.py`](https://github.com/MagmaMoose/draventis/blob/main/src/draventis/zap.py) | Pick the AF plan for a policy, export `${DRAVENTIS_*}` env, build & run `zap.sh`, return the report path. | stdlib only |
+| [`nuclei.py`](https://github.com/MagmaMoose/draventis/blob/main/src/draventis/nuclei.py) | Build & run the `nuclei` command (JSONL output; `-dast` for non-baseline). | stdlib only |
+| [`defectdojo.py`](https://github.com/MagmaMoose/draventis/blob/main/src/draventis/defectdojo.py) | `reimport-scan` client: build multipart, POST via `urllib`, **failure-isolated**. | stdlib only |
+| [`__main__.py`](https://github.com/MagmaMoose/draventis/blob/main/src/draventis/__main__.py) | The `draventis run` CLI: parse args, select targets, orchestrate scan + upload. | None |
 
 ### Design properties
 
@@ -41,7 +41,7 @@ not stop the rest.
   unit-tested without invoking the real binaries. `--dry-run` builds everything
   and executes nothing.
 - **Secrets never touch config or code paths that log.** Credentials are read
-  from the environment by name (`auth.user_env` etc.); dastgate passes the env
+  from the environment by name (`auth.user_env` etc.); draventis passes the env
   through to ZAP but does not read or print the values.
 - **Policy → plan → report** is a single mapping in `zap.py`
   (`_PLAN_BY_POLICY`), so adding a policy is one table entry + one plan file.
@@ -49,7 +49,7 @@ not stop the rest.
 ## The CLI
 
 ```
-dastgate run [--all | --target NAME] [--schedule nightly|weekly]
+draventis run [--all | --target NAME] [--schedule nightly|weekly]
              [--config PATH] [--plans-dir DIR] [--workdir DIR]
              [--no-nuclei] [--dry-run]
 ```
@@ -57,7 +57,7 @@ dastgate run [--all | --target NAME] [--schedule nightly|weekly]
 Exit codes: `0` all selected targets attempted OK, `1` at least one scan failed
 to produce a report, `2` bad arguments or config.
 
-The CronJobs run `dastgate run --schedule <name>`, so each schedule scans only
+The CronJobs run `draventis run --schedule <name>`, so each schedule scans only
 its own targets.
 
 ## Automation plans (`automation/`)
@@ -65,10 +65,10 @@ its own targets.
 One ZAP Automation Framework plan per policy. Each ends in a `report` job that
 writes the traditional XML DefectDojo's `ZAP Scan` parser ingests. The target
 URL (and, for authenticated plans, the login URL and credentials) is substituted
-from the environment at plan-load time (`${DASTGATE_TARGET_URL}`, `${ZAP_USER}`,
+from the environment at plan-load time (`${DRAVENTIS_TARGET_URL}`, `${ZAP_USER}`,
 …).
 
-## The chart (`charts/dastgate/`)
+## The chart (`charts/draventis/`)
 
 Renders `targets.yaml` into a ConfigMap, provisions the secret backend (plain
 Secret or ExternalSecret), and creates a CronJob per enabled schedule. See

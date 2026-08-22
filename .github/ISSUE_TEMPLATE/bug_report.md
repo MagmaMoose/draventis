@@ -25,11 +25,11 @@ targets.yaml (redacted) / helm values / command
 
 ## Environment
 
-- dastgate version / image tag:
+- draventis version / image tag:
 - How deployed: Helm chart / local CLI / other
 - Kubernetes distro + version (if applicable):
 - Scanner: ZAP / Nuclei
 
 ## Logs
 
-<!-- Relevant `[dastgate] ...` output. Redact secrets. -->
+<!-- Relevant `[draventis] ...` output. Redact secrets. -->

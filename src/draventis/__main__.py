@@ -1,4 +1,4 @@
-"""dastgate CLI — ``dastgate run``.
+"""draventis CLI — ``draventis run``.
 
 Loads ``targets.yaml``, selects targets by name/schedule, runs ZAP (and
 optionally Nuclei) against each, and reimports the reports into DefectDojo.
@@ -6,10 +6,10 @@ Per-target failures are isolated: one target failing does not stop the rest.
 
 Examples
 --------
-    dastgate run --all
-    dastgate run --schedule nightly
-    dastgate run --target app-staging
-    dastgate run --all --dry-run        # print plans + upload shape, run nothing
+    draventis run --all
+    draventis run --schedule nightly
+    draventis run --target app-staging
+    draventis run --all --dry-run        # print plans + upload shape, run nothing
 """
 
 from __future__ import annotations
@@ -29,7 +29,7 @@ DEFAULT_WORKDIR = "/zap/wrk"
 
 
 def _log(msg: str) -> None:
-    print(f"[dastgate] {msg}", flush=True)
+    print(f"[draventis] {msg}", flush=True)
 
 
 def _scan_type_and_report(kind: str) -> str:
@@ -140,8 +140,8 @@ def orchestrate(cfg: Config, args: argparse.Namespace) -> int:
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(prog="dastgate", description=__doc__)
-    parser.add_argument("--version", action="version", version=f"dastgate {__version__}")
+    parser = argparse.ArgumentParser(prog="draventis", description=__doc__)
+    parser.add_argument("--version", action="version", version=f"draventis {__version__}")
     sub = parser.add_subparsers(dest="command", required=True)
 
     run = sub.add_parser("run", help="scan targets and reimport into DefectDojo")

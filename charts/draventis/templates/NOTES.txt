@@ -1,9 +1,9 @@
-dastgate {{ .Chart.AppVersion }} installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
+draventis {{ .Chart.AppVersion }} installed as release "{{ .Release.Name }}" in namespace "{{ .Release.Namespace }}".
 
 Scheduled scans:
 {{- range $sched, $cfg := .Values.schedules }}
 {{- if $cfg.enabled }}
-  - {{ include "dastgate.fullname" $ }}-{{ $sched }}  (schedule: "{{ $cfg.cron }}")
+  - {{ include "draventis.fullname" $ }}-{{ $sched }}  (schedule: "{{ $cfg.cron }}")
 {{- end }}
 {{- end }}
 
@@ -19,15 +19,15 @@ Trigger a scan now (instead of waiting for the schedule):
 {{- range $sched, $cfg := .Values.schedules }}
 {{- if $cfg.enabled }}
 
-  kubectl -n {{ $.Release.Namespace }} create job --from=cronjob/{{ include "dastgate.fullname" $ }}-{{ $sched }} {{ include "dastgate.name" $ }}-manual-{{ $sched }}
+  kubectl -n {{ $.Release.Namespace }} create job --from=cronjob/{{ include "draventis.fullname" $ }}-{{ $sched }} {{ include "draventis.name" $ }}-manual-{{ $sched }}
 {{- end }}
 {{- end }}
 
 Dry-run the config the chart rendered (no scanning):
 
-  kubectl -n {{ .Release.Namespace }} run dastgate-dryrun --rm -it --restart=Never \
-    --image={{ include "dastgate.image" . }} \
-    --overrides='{"spec":{"volumes":[{"name":"c","configMap":{"name":"{{ include "dastgate.fullname" . }}-config"}}],"containers":[{"name":"d","image":"{{ include "dastgate.image" . }}","args":["run","--all","--dry-run","--config","/config/targets.yaml","--plans-dir","/automation"],"volumeMounts":[{"name":"c","mountPath":"/config"}]}]}}'
+  kubectl -n {{ .Release.Namespace }} run draventis-dryrun --rm -it --restart=Never \
+    --image={{ include "draventis.image" . }} \
+    --overrides='{"spec":{"volumes":[{"name":"c","configMap":{"name":"{{ include "draventis.fullname" . }}-config"}}],"containers":[{"name":"d","image":"{{ include "draventis.image" . }}","args":["run","--all","--dry-run","--config","/config/targets.yaml","--plans-dir","/automation"],"volumeMounts":[{"name":"c","mountPath":"/config"}]}]}}'
 
 {{ if not .Values.defectDojo.url }}
 WARNING: defectDojo.url is unset, so scan results are not uploaded anywhere.

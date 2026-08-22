@@ -24,7 +24,7 @@ example (`targets.local.yaml` is gitignored):
 
 ```bash
 cp targets.example.yaml targets.local.yaml    # then edit it
-uv run dastgate run --all --config targets.local.yaml --dry-run
+uv run draventis run --all --config targets.local.yaml --dry-run
 ```
 
 A minimal config looks like:
@@ -47,7 +47,7 @@ Selection flags:
   CronJobs use)
 
 Other useful flags: `--config`, `--plans-dir`, `--workdir`, `--no-nuclei`,
-`--dry-run`. Run `uv run dastgate run --help` for the full list.
+`--dry-run`. Run `uv run draventis run --help` for the full list.
 
 ## Build the scanner image
 
@@ -55,12 +55,12 @@ The real scanning happens inside the container, which bundles ZAP + headless
 browsers + Nuclei + the CLI:
 
 ```bash
-docker build -t dastgate:local .
+docker build -t draventis:local .
 
 docker run --rm \
   -e DEFECTDOJO_TOKEN=$DEFECTDOJO_TOKEN \
   -v "$PWD/targets.yaml:/config/targets.yaml:ro" \
-  dastgate:local run --all --config /config/targets.yaml --dry-run
+  draventis:local run --all --config /config/targets.yaml --dry-run
 ```
 
 Pin the Nuclei release at build time with `--build-arg NUCLEI_VERSION=x.y.z`.
@@ -76,10 +76,10 @@ mkdocs build                     # render static site to ./site (gitignored)
 ## Layout
 
 ```
-src/dastgate/      # the CLI + modules (see Architecture)
+src/draventis/      # the CLI + modules (see Architecture)
 tests/             # unit tests, one file per concern
 automation/        # ZAP Automation Framework plans (one per policy)
-charts/dastgate/   # the Helm chart
+charts/draventis/   # the Helm chart
 docs/              # this documentation
 Dockerfile         # the scanner image
 ```

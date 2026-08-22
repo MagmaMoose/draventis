@@ -4,7 +4,7 @@ import json
 
 import pytest
 
-from dastgate.__main__ import main
+from draventis.__main__ import main
 
 CONFIG = {
     "defaults": {"schedule": "nightly"},

@@ -1,7 +1,7 @@
-site_name: dastgate
+site_name: draventis
 site_description: Scheduled DAST (OWASP ZAP + Nuclei) for Kubernetes, reimported into DefectDojo.
-repo_url: https://github.com/MagmaMoose/dastgate
-repo_name: MagmaMoose/dastgate
+repo_url: https://github.com/MagmaMoose/draventis
+repo_name: MagmaMoose/draventis
 docs_dir: docs
 
 theme:
@@ -44,4 +44,4 @@ markdown_extensions:
 extra:
   social:
     - icon: fontawesome/brands/github
-      link: https://github.com/MagmaMoose/dastgate
+      link: https://github.com/MagmaMoose/draventis

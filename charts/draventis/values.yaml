@@ -1,5 +1,5 @@
 # =============================================================================
-# dastgate — Helm values
+# draventis — Helm values
 #
 # Scheduled DAST (OWASP ZAP + Nuclei) against already-deployed targets, with
 # results reimported into DefectDojo. Override the sections you need; the
@@ -11,11 +11,11 @@ nameOverride: ""
 fullnameOverride: ""
 
 # --- Scanner image ------------------------------------------------------------
-# The published image bundles ZAP + headless browsers + Nuclei + the dastgate
+# The published image bundles ZAP + headless browsers + Nuclei + the draventis
 # CLI (see the repo Dockerfile). Point `repository` at your own registry if you
 # build it yourself.
 image:
-  repository: ghcr.io/magmamoose/dastgate
+  repository: ghcr.io/magmamoose/draventis
   tag: "" # defaults to the chart appVersion
   pullPolicy: IfNotPresent
   pullSecrets: []
@@ -109,12 +109,12 @@ externalSecret:
     name: "" # e.g. cluster-secret-store
     kind: ClusterSecretStore
   refreshInterval: "1h"
-  # Map remote store keys -> the env keys dastgate expects (DEFECTDOJO_TOKEN,
+  # Map remote store keys -> the env keys draventis expects (DEFECTDOJO_TOKEN,
   # ZAP_*). See docs/deployment.md for a worked example.
   data: []
 
 # --- ServiceAccount -----------------------------------------------------------
-# dastgate needs NO Kubernetes API access, so the account has no RBAC and does
+# draventis needs NO Kubernetes API access, so the account has no RBAC and does
 # not mount a token.
 serviceAccount:
   create: true

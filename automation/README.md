@@ -3,10 +3,10 @@
 Each file here is a **ZAP Automation Framework (AF) plan**, one declarative YAML
 that orchestrates the crawl, scan, auth, and report steps. AF replaced the old
 `zap-baseline` / `zap-full-scan` shell entry points and is the standard for every
-dastgate job.
+draventis job.
 
-`dastgate` picks the plan for each target's `policy` (see
-[`src/dastgate/zap.py`](../src/dastgate/zap.py)), exports the target URL into the
+`draventis` picks the plan for each target's `policy` (see
+[`src/draventis/zap.py`](../src/draventis/zap.py)), exports the target URL into the
 environment, and runs `zap.sh -cmd -autorun <plan>`.
 
 ## Plans
@@ -17,8 +17,8 @@ environment, and runs `zap.sh -cmd -autorun <plan>`.
 | `full-active.yaml` | `full` | baseline + `spiderAjax` + `activeScan` | **Yes** (active) | **staging only** |
 | `api-scan.yaml` | `api` | `openapi` import → spider → `activeScan` | Yes | staging services with an OpenAPI spec |
 
-The target host is injected as `${DASTGATE_TARGET_URL}`; for authenticated plans,
-`${DASTGATE_LOGIN_URL}`, `${ZAP_USER}` and `${ZAP_PASS}` are populated from the
+The target host is injected as `${DRAVENTIS_TARGET_URL}`; for authenticated plans,
+`${DRAVENTIS_LOGIN_URL}`, `${ZAP_USER}` and `${ZAP_PASS}` are populated from the
 environment (a mounted Secret). ZAP substitutes `${VAR}` at plan-load time. Every
 value comes from config you control, never from a scanned response.
 
@@ -26,7 +26,7 @@ value comes from config you control, never from a scanned response.
 
 Every plan ends in a `report` job that writes the **traditional XML** report ZAP's
 DefectDojo parser ingests (e.g. `/zap/wrk/zap-baseline.xml`).
-[`src/dastgate/defectdojo.py`](../src/dastgate/defectdojo.py) then POSTs it to
+[`src/draventis/defectdojo.py`](../src/draventis/defectdojo.py) then POSTs it to
 **`/api/v2/reimport-scan/`** (stdlib `urllib`, failure-isolated: an upload error
 never fails the scan):
 

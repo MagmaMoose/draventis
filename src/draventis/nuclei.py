@@ -1,7 +1,7 @@
 """Drive Nuclei — the fast, templated, low-false-positive complement to ZAP.
 
 Nuclei emits JSONL that DefectDojo's ``Nuclei Scan`` parser ingests. As with
-:mod:`dastgate.zap`, this module only builds and runs the command; the scanning
+:mod:`draventis.zap`, this module only builds and runs the command; the scanning
 is Nuclei's job.
 """
 

@@ -1,6 +1,6 @@
 """Drive the ZAP Automation Framework (``zap.sh -autorun``).
 
-dastgate picks the AF plan for a target's policy, exports the target URL (and,
+draventis picks the AF plan for a target's policy, exports the target URL (and,
 for authenticated plans, the scan credentials) into the environment that ZAP
 substitutes ``${VAR}`` from, invokes ``zap.sh``, and returns the report path the
 plan writes. The scanning itself is done by ZAP; this module is just the glue.
@@ -48,14 +48,14 @@ def plan_for_policy(policy: ScanPolicy) -> tuple[str, str]:
 def build_env(target: Target, base_env: Mapping[str, str] | None = None) -> dict[str, str]:
     """Build the environment ZAP resolves ``${...}`` placeholders from."""
     env = dict(base_env if base_env is not None else os.environ)
-    env["DASTGATE_TARGET_URL"] = target.url
+    env["DRAVENTIS_TARGET_URL"] = target.url
     # ZAP `includePaths` are regexes, so a raw URL would leave every `.` in the
     # hostname as a live wildcard (scope-widening). Export a pre-escaped scope.
-    env["DASTGATE_TARGET_SCOPE_REGEX"] = re.escape(target.url) + ".*"
+    env["DRAVENTIS_TARGET_SCOPE_REGEX"] = re.escape(target.url) + ".*"
     if target.openapi:
-        env["DASTGATE_OPENAPI_URL"] = target.openapi
+        env["DRAVENTIS_OPENAPI_URL"] = target.openapi
     if target.auth.enabled and target.auth.login_url:
-        env["DASTGATE_LOGIN_URL"] = target.auth.login_url
+        env["DRAVENTIS_LOGIN_URL"] = target.auth.login_url
     # ZAP_USER / ZAP_PASS are expected to already be present in base_env (from a
     # mounted Secret); we do not read or copy the values here.
     return env

@@ -1,11 +1,11 @@
 # ---------------------------------------------------------------------------
 # ZAP Automation Framework plan: passive baseline scan.
 #
-# This is the plan `dastgate` runs for a target whose policy is `baseline`.
+# This is the plan `draventis` runs for a target whose policy is `baseline`.
 #
 # Passive baseline = spider + passive rules only. NO active attacks and NO
 # ajax-spider, so it is safe/non-destructive to run against production hosts.
-# The target comes from the DASTGATE_TARGET_URL environment variable (ZAP AF
+# The target comes from the DRAVENTIS_TARGET_URL environment variable (ZAP AF
 # substitutes ${VAR} at plan-load time). Targets and credentials MUST come only
 # from config you control — never from a scanned response.
 #
@@ -17,10 +17,10 @@ env:
   contexts:
     - name: baseline-target
       urls:
-        - "${DASTGATE_TARGET_URL}"
+        - "${DRAVENTIS_TARGET_URL}"
       includePaths:
         # Pre-escaped regex (dots in the host are literal, not wildcards).
-        - "${DASTGATE_TARGET_SCOPE_REGEX}"
+        - "${DRAVENTIS_TARGET_SCOPE_REGEX}"
       excludePaths:
         - ".*/logout.*"
         - ".*/admin/delete.*"

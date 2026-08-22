@@ -1,6 +1,6 @@
-# dastgate
+# draventis
 
-[![CI](https://github.com/MagmaMoose/dastgate/actions/workflows/ci.yml/badge.svg)](https://github.com/MagmaMoose/dastgate/actions/workflows/ci.yml)
+[![CI](https://github.com/MagmaMoose/draventis/actions/workflows/ci.yml/badge.svg)](https://github.com/MagmaMoose/draventis/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 [![Python 3.11+](https://img.shields.io/badge/python-3.11%2B-blue.svg)](pyproject.toml)
 
@@ -13,7 +13,7 @@ schedule against your already-deployed targets, with results reimported into
 Deploy it to any cluster with Helm, point it at your URLs, and it does the rest.
 
 ```bash
-helm install dastgate ./charts/dastgate \
+helm install draventis ./charts/draventis \
   --namespace security --create-namespace \
   --set defectDojo.url=https://defectdojo.example.com \
   --set secret.defectDojoToken=$DEFECTDOJO_TOKEN \
@@ -39,12 +39,12 @@ rest**. It never sends an HTTP request to a running instance. DAST closes the
 
 ## How it works
 
-dastgate is an **orchestrator + uploader**. The scanner is the engine, dastgate
+draventis is an **orchestrator + uploader**. The scanner is the engine, draventis
 schedules it and ships the results:
 
 ```
 CronJob (nightly / weekly)
-  └─ dastgate run --schedule <name>
+  └─ draventis run --schedule <name>
        ├─ for each target in targets.yaml:
        │    ├─ ZAP  (Automation Framework plan chosen by policy) → report.xml
        │    └─ Nuclei (optional)                                 → report.jsonl
@@ -107,8 +107,8 @@ either a plain Kubernetes Secret (default) or
 
 ## Authenticated scanning
 
-Apps behind an OIDC proxy need dastgate to authenticate. The config model accepts
-per-target `auth` (and dastgate exports the login URL + credentials into the
+Apps behind an OIDC proxy need draventis to authenticate. The config model accepts
+per-target `auth` (and draventis exports the login URL + credentials into the
 scan environment), but **the shipped AF plans do not yet include an
 `authentication` block**. Wiring it in is a per-target step you add to the plan
 today. Two complementary approaches (see [`docs/design.md`](docs/design.md)):
@@ -125,7 +125,7 @@ today. Two complementary approaches (see [`docs/design.md`](docs/design.md)):
 ```bash
 uv sync
 cp targets.example.yaml targets.local.yaml                        # then edit it
-uv run dastgate run --all --config targets.local.yaml --dry-run   # plan only, no scan
+uv run draventis run --all --config targets.local.yaml --dry-run   # plan only, no scan
 uv run pytest -q
 ```
 

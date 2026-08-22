@@ -4,7 +4,7 @@
 
 **Please do not open a public issue for security vulnerabilities.**
 
-Report privately via GitHub's [private vulnerability reporting](https://github.com/MagmaMoose/dastgate/security/advisories/new)
+Report privately via GitHub's [private vulnerability reporting](https://github.com/MagmaMoose/draventis/security/advisories/new)
 ("Report a vulnerability" under the repo's **Security** tab). If that is
 unavailable, email the maintainer (see `pyproject.toml`) with `SECURITY` in the
 subject.
@@ -17,7 +17,7 @@ disclosure timeline with you.
 
 ## Scope
 
-dastgate is a **DAST orchestrator**: it runs scanners (OWASP ZAP, Nuclei) against
+draventis is a **DAST orchestrator**: it runs scanners (OWASP ZAP, Nuclei) against
 targets you configure and uploads results to DefectDojo. Especially relevant:
 
 - Handling of scan **credentials** and the DefectDojo **token** (they must never
@@ -25,7 +25,7 @@ targets you configure and uploads results to DefectDojo. Especially relevant:
 - The Helm chart's security posture (RBAC, `securityContext`, secret handling).
 - The container image and its supply chain (base image, Nuclei download).
 
-## Operating dastgate safely
+## Operating draventis safely
 
 - Only point **active** policies (`full`, `api`) at non-production (staging)
   targets. `baseline` is passive and production-safe.

@@ -1,6 +1,6 @@
 {{- /*
 One CronJob per enabled schedule (nightly, weekly). Each runs
-`dastgate run --schedule <name>`, which scans only the targets whose schedule
+`draventis run --schedule <name>`, which scans only the targets whose schedule
 matches. concurrencyPolicy Forbid + activeDeadlineSeconds stop a hung scan from
 piling up or running forever.
 */ -}}
@@ -18,11 +18,11 @@ piling up or running forever.
 apiVersion: batch/v1
 kind: CronJob
 metadata:
-  name: {{ include "dastgate.fullname" $ }}-{{ $sched }}
+  name: {{ include "draventis.fullname" $ }}-{{ $sched }}
   namespace: {{ $.Release.Namespace }}
   labels:
-    {{- include "dastgate.labels" $ | nindent 4 }}
-    dastgate.io/schedule: {{ $sched }}
+    {{- include "draventis.labels" $ | nindent 4 }}
+    draventis.io/schedule: {{ $sched }}
 spec:
   schedule: {{ $cfg.cron | quote }}
   concurrencyPolicy: {{ $.Values.concurrencyPolicy }}
@@ -38,13 +38,13 @@ spec:
       template:
         metadata:
           annotations:
-            container.apparmor.security.beta.kubernetes.io/dastgate: runtime/default
+            container.apparmor.security.beta.kubernetes.io/draventis: runtime/default
           labels:
-            {{- include "dastgate.selectorLabels" $ | nindent 12 }}
-            dastgate.io/schedule: {{ $sched }}
+            {{- include "draventis.selectorLabels" $ | nindent 12 }}
+            draventis.io/schedule: {{ $sched }}
         spec:
           restartPolicy: Never
-          serviceAccountName: {{ include "dastgate.serviceAccountName" $ }}
+          serviceAccountName: {{ include "draventis.serviceAccountName" $ }}
           automountServiceAccountToken: false
           {{- with $.Values.image.pullSecrets }}
           imagePullSecrets:
@@ -67,12 +67,12 @@ spec:
           volumes:
             - name: config
               configMap:
-                name: {{ include "dastgate.fullname" $ }}-config
+                name: {{ include "draventis.fullname" $ }}-config
             - name: workdir
               emptyDir: {}
           containers:
-            - name: dastgate
-              image: {{ include "dastgate.image" $ | quote }}
+            - name: draventis
+              image: {{ include "draventis.image" $ | quote }}
               imagePullPolicy: {{ $.Values.image.pullPolicy }}
               args:
                 - run
@@ -84,7 +84,7 @@ spec:
                 - /automation
               envFrom:
                 - secretRef:
-                    name: {{ include "dastgate.secretName" $ }}
+                    name: {{ include "draventis.secretName" $ }}
               securityContext:
                 {{- toYaml $.Values.securityContext | nindent 16 }}
               resources:

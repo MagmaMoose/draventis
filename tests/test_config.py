@@ -4,8 +4,8 @@ import json
 
 import pytest
 
-from dastgate.config import ConfigError, load_config, parse_config
-from dastgate.model import ScanPolicy, Schedule
+from draventis.config import ConfigError, load_config, parse_config
+from draventis.model import ScanPolicy, Schedule
 
 
 def _base() -> dict:

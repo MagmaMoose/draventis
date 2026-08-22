@@ -2,7 +2,7 @@
 
 There are two layers:
 
-1. **`targets.yaml`**: what dastgate itself reads (the scan config). In a
+1. **`targets.yaml`**: what draventis itself reads (the scan config). In a
    cluster the Helm chart renders it into a ConfigMap and mounts it at
    `/config/targets.yaml`.
 2. **Chart `values.yaml`**: how you configure the Helm release; the chart
@@ -57,7 +57,7 @@ targets:
 | `auth.user_env` / `auth.pass_env` | `ZAP_USER` / `ZAP_PASS` | Env vars the creds are read from. |
 
 !!! note "Authenticated scanning is not fully wired yet"
-    dastgate parses `auth` and exports `DASTGATE_LOGIN_URL` / the credential env
+    draventis parses `auth` and exports `DRAVENTIS_LOGIN_URL` / the credential env
     vars into the scan environment, but the shipped AF plans in `automation/` do
     not yet contain an `authentication` block, so they scan unauthenticated. To
     scan behind an OIDC login today, add an `authentication` (browser method) +
@@ -91,7 +91,7 @@ from these values:
 
 Secrets are supplied separately (`secret.*` or `externalSecret.*`) and reach the
 container as env vars. See [Deployment](deployment.md). The full annotated
-values file is [`charts/dastgate/values.yaml`](https://github.com/MagmaMoose/dastgate/blob/main/charts/dastgate/values.yaml).
+values file is [`charts/draventis/values.yaml`](https://github.com/MagmaMoose/draventis/blob/main/charts/draventis/values.yaml).
 
 ## Scan policies
 

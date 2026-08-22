@@ -1,12 +1,12 @@
 # Deployment
 
-dastgate installs on any Kubernetes cluster with Helm. It has no hard dependency
+draventis installs on any Kubernetes cluster with Helm. It has no hard dependency
 on any particular secret store, ingress, or GitOps tool.
 
 ## Quick start
 
 ```bash
-helm install dastgate ./charts/dastgate \
+helm install draventis ./charts/draventis \
   --namespace security --create-namespace \
   --set defectDojo.url=https://defectdojo.example.com \
   --set secret.defectDojoToken=$DEFECTDOJO_TOKEN \
@@ -41,7 +41,7 @@ schedules:
 ```
 
 ```bash
-helm install dastgate ./charts/dastgate -n security --create-namespace \
+helm install draventis ./charts/draventis -n security --create-namespace \
   -f my-values.yaml \
   --set secret.defectDojoToken=$DEFECTDOJO_TOKEN
 ```
@@ -54,19 +54,19 @@ helm install dastgate ./charts/dastgate -n security --create-namespace \
 
 | Object | Purpose |
 |---|---|
-| `CronJob` (one per enabled schedule) | Runs `dastgate run --schedule <name>` |
+| `CronJob` (one per enabled schedule) | Runs `draventis run --schedule <name>` |
 | `ConfigMap` | The rendered `targets.yaml`, mounted at `/config` |
 | `Secret` *or* `ExternalSecret` | DefectDojo token + scan credentials (`envFrom`) |
-| `ServiceAccount` | No RBAC, token not mounted; dastgate needs no cluster API |
+| `ServiceAccount` | No RBAC, token not mounted; draventis needs no cluster API |
 
 ## The image
 
 The chart defaults to the published upstream image
-(`ghcr.io/magmamoose/dastgate`, tag = chart `appVersion`). To run your own build,
+(`ghcr.io/magmamoose/draventis`, tag = chart `appVersion`). To run your own build,
 push it and override:
 
 ```bash
---set image.repository=registry.example.com/dastgate --set image.tag=1.2.3
+--set image.repository=registry.example.com/draventis --set image.tag=1.2.3
 ```
 
 ## Secrets: plain Secret (default) vs External Secrets Operator
@@ -86,13 +86,13 @@ externalSecret:
   data:
     - secretKey: DEFECTDOJO_TOKEN
       remoteRef:
-        key: dastgate-defectdojo-token
+        key: draventis-defectdojo-token
     - secretKey: ZAP_USER
       remoteRef:
-        key: dastgate-scan-user
+        key: draventis-scan-user
     - secretKey: ZAP_PASS
       remoteRef:
-        key: dastgate-scan-pass
+        key: draventis-scan-pass
 ```
 
 When `externalSecret.enabled=true` the chart emits an `ExternalSecret` (named the
@@ -104,14 +104,14 @@ the CronJob is unchanged.
 CronJobs only fire on schedule. To run one immediately:
 
 ```bash
-kubectl -n security create job --from=cronjob/dastgate-nightly dastgate-manual
-kubectl -n security logs -f job/dastgate-manual
+kubectl -n security create job --from=cronjob/draventis-nightly draventis-manual
+kubectl -n security logs -f job/draventis-manual
 ```
 
 ## Verify the rendered config
 
 ```bash
-helm template dastgate ./charts/dastgate -f my-values.yaml \
+helm template draventis ./charts/draventis -f my-values.yaml \
   --show-only templates/configmap.yaml
 ```
 
@@ -128,4 +128,4 @@ GitOps controller.
 - Heavy active scans can be pinned to specific nodes via `nodeSelector` /
   `tolerations` / `affinity`.
 - An upload failure never fails the scan. Check CronJob logs for
-  `[dastgate] upload failed (non-fatal)`.
+  `[draventis] upload failed (non-fatal)`.
