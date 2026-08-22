@@ -15,7 +15,7 @@
 
 # Pinned by digest for reproducible, verifiable builds (this is the multi-arch
 # manifest list for the :stable tag; buildx still selects the right arch).
-FROM ghcr.io/zaproxy/zaproxy:stable@sha256:8d387b1a63e3425beef4846e39719f5af2a787753af2d8b6558c6257d7a577a2
+FROM ghcr.io/zaproxy/zaproxy:stable@sha256:781a2bdaea47324e7bab583e2263f21d257b0aee61ed51521a5be45f5f5081ef
 
 # Pin the Nuclei release. Override at build time: --build-arg NUCLEI_VERSION=x.y.z
 ARG NUCLEI_VERSION=3.3.7
