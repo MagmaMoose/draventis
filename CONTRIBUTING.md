@@ -1,6 +1,6 @@
 # Contributing
 
-Thanks for your interest in dastgate! Contributions are welcome.
+Thanks for your interest in draventis! Contributions are welcome.
 
 ## Development setup
 
@@ -10,7 +10,7 @@ Prerequisites: Python ≥ 3.11, [uv](https://docs.astral.sh/uv/), Helm ≥ 3, Do
 uv sync
 uv run ruff check .          # lint
 uv run pytest -q             # tests
-helm lint charts/dastgate    # chart
+helm lint charts/draventis    # chart
 ```
 
 See [`docs/setup.md`](docs/setup.md) for the full local workflow and
@@ -19,8 +19,8 @@ See [`docs/setup.md`](docs/setup.md) for the full local workflow and
 ## Before you open a PR
 
 - **Lint + tests pass:** `uv run ruff check . && uv run pytest -q`.
-- **Chart still renders:** `helm lint charts/dastgate` and
-  `helm template dg charts/dastgate`. If you change `values.yaml`, keep the
+- **Chart still renders:** `helm lint charts/draventis` and
+  `helm template dg charts/draventis`. If you change `values.yaml`, keep the
   chart-rendered `targets.yaml` loadable by the CLI (the round-trip in
   [`.claude/QUICK_START.md`](.claude/QUICK_START.md)).
 - **Docs updated** if you changed behaviour, config, or setup (`docs/`).

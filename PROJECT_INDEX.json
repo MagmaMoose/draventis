@@ -1,53 +1,53 @@
 {
   "generated": "2026-07-22T14:16:31Z",
-  "summary": "dastgate is a scheduled DAST orchestrator for Kubernetes: a small Python CLI runs OWASP ZAP (Automation Framework) and Nuclei against already-deployed targets and reimports the reports into DefectDojo over its REST API. It ships as a generic Helm chart (CronJob per schedule) and a container image bundling the scanners; the DefectDojo client is stdlib urllib and failure-isolated.",
+  "summary": "draventis is a scheduled DAST orchestrator for Kubernetes: a small Python CLI runs OWASP ZAP (Automation Framework) and Nuclei against already-deployed targets and reimports the reports into DefectDojo over its REST API. It ships as a generic Helm chart (CronJob per schedule) and a container image bundling the scanners; the DefectDojo client is stdlib urllib and failure-isolated.",
   "entrypoints": [
-    "src/dastgate/__main__.py:main",
-    "charts/dastgate/templates/cronjob.yaml:CronJob",
+    "src/draventis/__main__.py:main",
+    "charts/draventis/templates/cronjob.yaml:CronJob",
     "Dockerfile:ENTRYPOINT"
   ],
   "modules": {
     "model": {
-      "path": "src/dastgate/model.py",
+      "path": "src/draventis/model.py",
       "purpose": "Typed, dependency-free config dataclasses and enums (the in-memory shape of targets.yaml).",
       "exports": ["ScanPolicy", "Schedule", "AuthProfile", "Target", "DefectDojoConfig", "Config"],
       "depends_on": []
     },
     "config": {
-      "path": "src/dastgate/config.py",
+      "path": "src/draventis/config.py",
       "purpose": "Load & validate targets.yaml (or JSON) into a Config; apply defaults; reject dupes/missing fields.",
       "exports": ["load_config", "parse_config", "ConfigError"],
       "depends_on": ["model", "PyYAML (lazy)"]
     },
     "zap": {
-      "path": "src/dastgate/zap.py",
-      "purpose": "Pick the ZAP AF plan for a policy, export ${DASTGATE_*} env, build & run zap.sh, return the report path. Runner is injectable for tests.",
+      "path": "src/draventis/zap.py",
+      "purpose": "Pick the ZAP AF plan for a policy, export ${DRAVENTIS_*} env, build & run zap.sh, return the report path. Runner is injectable for tests.",
       "exports": ["plan_for_policy", "build_env", "build_command", "run_scan", "ScanArtifacts"],
       "depends_on": ["model"]
     },
     "nuclei": {
-      "path": "src/dastgate/nuclei.py",
+      "path": "src/draventis/nuclei.py",
       "purpose": "Build & run the nuclei command (JSONL output; -dast for non-baseline targets). Runner injectable.",
       "exports": ["build_command", "run_scan", "report_name", "NucleiArtifacts"],
       "depends_on": ["model"]
     },
     "defectdojo": {
-      "path": "src/dastgate/defectdojo.py",
+      "path": "src/draventis/defectdojo.py",
       "purpose": "reimport-scan client: build multipart/form-data, POST via urllib, never raise (failure-isolated).",
       "exports": ["reimport", "build_multipart", "ReimportResult"],
       "depends_on": ["stdlib urllib"]
     },
     "cli": {
-      "path": "src/dastgate/__main__.py",
-      "purpose": "The `dastgate run` CLI: parse args, select targets by name/schedule, orchestrate scan + upload with per-target failure isolation.",
+      "path": "src/draventis/__main__.py",
+      "purpose": "The `draventis run` CLI: parse args, select targets by name/schedule, orchestrate scan + upload with per-target failure isolation.",
       "exports": ["main", "orchestrate", "scan_target", "build_parser"],
       "depends_on": ["config", "zap", "nuclei", "defectdojo", "model"]
     },
     "chart": {
-      "path": "charts/dastgate/",
+      "path": "charts/draventis/",
       "purpose": "Generic Helm chart: renders targets.yaml into a ConfigMap, provisions a plain Secret or ExternalSecret, and creates a CronJob per enabled schedule.",
       "exports": ["Chart.yaml", "values.yaml", "templates/cronjob.yaml", "templates/configmap.yaml", "templates/secret.yaml", "templates/externalsecret.yaml", "templates/serviceaccount.yaml", "templates/_helpers.tpl", "templates/NOTES.txt"],
-      "depends_on": ["dastgate image", "automation plans (baked into image)"]
+      "depends_on": ["draventis image", "automation plans (baked into image)"]
     },
     "automation": {
       "path": "automation/",
@@ -79,18 +79,18 @@
     },
     {
       "caller": "chart:cronjob.yaml",
-      "calls": ["dastgate run --schedule <name>"],
+      "calls": ["draventis run --schedule <name>"],
       "note": "The deployed entrypoint; mounts the ConfigMap targets.yaml, envFrom the secret."
     }
   ],
   "hotspots": [
-    "src/dastgate/__main__.py",
-    "src/dastgate/model.py",
-    "src/dastgate/config.py",
-    "src/dastgate/defectdojo.py",
-    "charts/dastgate/values.yaml",
-    "charts/dastgate/templates/cronjob.yaml",
-    "charts/dastgate/templates/configmap.yaml",
+    "src/draventis/__main__.py",
+    "src/draventis/model.py",
+    "src/draventis/config.py",
+    "src/draventis/defectdojo.py",
+    "charts/draventis/values.yaml",
+    "charts/draventis/templates/cronjob.yaml",
+    "charts/draventis/templates/configmap.yaml",
     "automation/zap-baseline.yaml"
   ]
 }

@@ -1,16 +1,16 @@
-# docker-bake.hcl — build definition for the dastgate scanner image.
+# docker-bake.hcl — build definition for the draventis scanner image.
 #
 # Consumed by the Diatreme release workflow (docker buildx bake ... default),
 # which sets REGISTRY / IMAGE_NAME / VERSION from the environment and passes
 # --push. Also usable locally: `docker buildx bake` or `docker buildx bake
-# --set default.tags=dastgate:local`.
+# --set default.tags=draventis:local`.
 
 variable "REGISTRY" {
   default = "ghcr.io"
 }
 
 variable "IMAGE_NAME" {
-  default = "magmamoose/dastgate"
+  default = "magmamoose/draventis"
 }
 
 variable "VERSION" {

@@ -1,16 +1,17 @@
-# dastgate scanner image.
+# draventis scanner image.
 #
 # Built on the official ZAP image (ZAP + JRE + headless browsers for
-# browser-based OIDC auth), plus the Nuclei binary and the `dastgate` Python
+# browser-based OIDC auth), plus the Nuclei binary and the `draventis` Python
 # package. Runs as the non-root `zap` user the base image provides.
 #
-#   docker build -t dastgate:local .
+#   docker build -t draventis:local .
 #   docker run --rm -e DEFECTDOJO_URL=... -e DEFECTDOJO_TOKEN=... \
 #     -v "$PWD/targets.yaml:/config/targets.yaml:ro" \
-#     dastgate:local run --all --config /config/targets.yaml
-# No HEALTHCHECK: this is a batch/CronJob image (runs `dastgate run` to
+#     draventis:local run --all --config /config/targets.yaml
+# No HEALTHCHECK: this is a batch/CronJob image (runs `draventis run` to
 # completion), not a long-running service. Kubernetes ignores Docker HEALTHCHECK
 # and tracks the Job's exit status instead, so a healthcheck would be meaningless.
+# trivy:ignore:DS-0026
 # kics-scan disable=b03a748a-542d-44f4-bb86-9199ab4fd2d5
 
 # Pinned by digest for reproducible, verifiable builds (this is the multi-arch
@@ -36,7 +37,7 @@ RUN set -eux; \
     rm -f /tmp/nuclei.zip; \
     nuclei -version
 
-# Install the dastgate package.
+# Install the draventis package.
 COPY pyproject.toml README.md /src/
 COPY src /src/src
 # The root build steps above (pip, `nuclei -version`) run with HOME=/home/zap and
@@ -47,7 +48,7 @@ RUN python3 -m pip install --no-cache-dir --break-system-packages /src \
     && rm -rf /src \
     && chown -R 1000:1000 /home/zap
 
-# Ship the ZAP Automation Framework plans dastgate renders per target.
+# Ship the ZAP Automation Framework plans draventis renders per target.
 COPY automation /automation
 
 # Numeric USER (uid 1000 = `zap`) so the kubelet can verify runAsNonRoot even
@@ -55,5 +56,5 @@ COPY automation /automation
 USER 1000:1000
 WORKDIR /zap/wrk
 
-ENTRYPOINT ["dastgate"]
+ENTRYPOINT ["draventis"]
 CMD ["run", "--all", "--config", "/config/targets.yaml", "--plans-dir", "/automation"]

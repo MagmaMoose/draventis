@@ -24,7 +24,7 @@ _CRLF = b"\r\n"
 # A real User-Agent: the urllib default ("Python-urllib/X.Y") is commonly banned
 # by edge WAFs by client signature (e.g. Cloudflare Bot Fight Mode, error 1010),
 # which would silently 403 every upload.
-_USER_AGENT = f"dastgate/{__version__} (+https://github.com/MagmaMoose/dastgate)"
+_USER_AGENT = f"draventis/{__version__} (+https://github.com/MagmaMoose/draventis)"
 
 
 @dataclass(slots=True)

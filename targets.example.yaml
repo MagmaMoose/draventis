@@ -1,7 +1,7 @@
-# Example dastgate config. Copy it and edit:
+# Example draventis config. Copy it and edit:
 #
 #   cp targets.example.yaml targets.local.yaml
-#   uv run dastgate run --all --config targets.local.yaml --dry-run
+#   uv run draventis run --all --config targets.local.yaml --dry-run
 #
 # targets.local.yaml is gitignored, so your real hosts never get committed.
 # Full reference: docs/configuration.md

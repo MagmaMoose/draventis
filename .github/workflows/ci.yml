@@ -29,11 +29,11 @@ jobs:
       - name: Install Helm
         run: curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
       - name: Helm lint
-        run: helm lint charts/dastgate
+        run: helm lint charts/draventis
       - name: Helm template (default + toggles)
         run: |
-          helm template dg charts/dastgate >/dev/null
-          helm template dg charts/dastgate \
+          helm template dg charts/draventis >/dev/null
+          helm template dg charts/draventis \
             --set schedules.weekly.enabled=true \
             --set externalSecret.enabled=true \
             --set externalSecret.secretStoreRef.name=store \
