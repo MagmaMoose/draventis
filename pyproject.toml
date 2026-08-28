@@ -46,6 +46,17 @@ packages = ["src/draventis"]
 
 [dependency-groups]
 dev = ["pytest>=8", "ruff>=0.6"]
+# Docs tooling (non-default group). The org-provisioned .github/workflows/docs.yml
+# builds with `uv run --group docs`, so this group is what makes that workflow work
+# at all — without it the docs job fails on every run.
+docs = [
+  "mkdocs-material>=9.5",
+  # Transitive via mkdocs-material. Floor pinned so a future re-lock cannot resolve
+  # back under GHSA-gm37-52c6-37mw (high: ReDoS in the inline processors) or
+  # GHSA-9xwg-3r6f-jcx2 (medium: path traversal in the b64 extension), both fixed
+  # in 11.0.1. mkdocs.yml uses pymdownx.superfences, so this is live, not theoretical.
+  "pymdown-extensions>=11.0.1",
+]
 
 [tool.ruff]
 line-length = 100
