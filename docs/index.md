@@ -14,7 +14,7 @@ draventis is an **orchestrator + uploader**. It runs as one or more Kubernetes
 CronJobs; on each run it reads `targets.yaml`, scans each target with ZAP (and
 optionally Nuclei), and reimports the reports into DefectDojo.
 
-```
+```text
 CronJob (nightly / weekly)
   └─ draventis run --schedule <name>
        ├─ for each target: ZAP plan (by policy) → report.xml

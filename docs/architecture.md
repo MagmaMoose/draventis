@@ -6,7 +6,7 @@ Nuclei) that live in the container image.
 
 ## Data flow
 
-```
+```text
 targets.yaml ──► config.load_config ──► Config (model.py)
                                           │
                  for each selected target │
@@ -48,7 +48,7 @@ not stop the rest.
 
 ## The CLI
 
-```
+```text
 draventis run [--all | --target NAME] [--schedule nightly|weekly]
              [--config PATH] [--plans-dir DIR] [--workdir DIR]
              [--no-nuclei] [--dry-run]

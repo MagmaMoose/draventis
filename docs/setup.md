@@ -75,7 +75,7 @@ mkdocs build                     # render static site to ./site (gitignored)
 
 ## Layout
 
-```
+```text
 src/draventis/      # the CLI + modules (see Architecture)
 tests/             # unit tests, one file per concern
 automation/        # ZAP Automation Framework plans (one per policy)

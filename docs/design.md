@@ -85,7 +85,7 @@ scan" *for free* (the drift signal DAST needs), without a merge-base diff.
 
 ### Engagement/test modeling
 
-```
+```yaml
 Product:     example/app
   Engagement: "DAST - app-staging"   (auto-created)
     Test:     "ZAP Scan"             ← reimport nightly/weekly
