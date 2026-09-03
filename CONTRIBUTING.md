@@ -39,4 +39,4 @@ vulnerabilities.
 ## License
 
 By contributing you agree your contributions are licensed under the project's
-[MIT License](LICENSE).
+[Apache-2.0 License](LICENSE).

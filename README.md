@@ -49,8 +49,10 @@ or running a scan locally, see [Setup](https://magmamoose.github.io/draventis/se
 
 ## Status
 
-Phase 0 / planning: the chart and CLI exist and run, the surrounding automation does not.
-Maturity is claimed here and nowhere else in this repo.
+The orchestration, config model, DefectDojo uploader, ZAP/Nuclei command
+building, Helm chart, and container image are implemented and unit-tested.
+Validate the end-to-end scan path against your own environment before relying on
+it. Start with a single `baseline` target against a safe host.
 
 ## Where it sits
 
@@ -62,4 +64,4 @@ routes findings between systems
 
 [Report a vulnerability](https://github.com/MagmaMoose/draventis/security/advisories/new) ·
 [Contributing](https://github.com/MagmaMoose/.github/blob/main/CONTRIBUTING.md) ·
-Apache-2.0, see [LICENSE](LICENSE).
+Apache-2.0, see [LICENSE](LICENSE)
