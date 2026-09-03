@@ -48,4 +48,4 @@ it. Start with a single `baseline` target against a safe host.
 
 ## License
 
-MIT.
+Apache-2.0.
