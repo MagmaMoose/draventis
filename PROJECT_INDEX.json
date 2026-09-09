@@ -1,5 +1,5 @@
 {
-  "generated": "2026-09-02T00:00:00Z",
+  "generated": "2026-09-09T00:00:00Z",
   "summary": "draventis is a scheduled DAST orchestrator for Kubernetes: a small Python CLI runs OWASP ZAP (Automation Framework) and Nuclei against already-deployed targets and reimports the reports into DefectDojo over its REST API. It ships as a generic Helm chart (CronJob per schedule) and a container image bundling the scanners; the DefectDojo client is stdlib urllib and failure-isolated.",
   "entrypoints": [
     "src/draventis/__main__.py:main",
