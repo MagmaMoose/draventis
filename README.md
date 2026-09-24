@@ -1,7 +1,7 @@
 # draventis
 
 [![CI](https://github.com/MagmaMoose/draventis/actions/workflows/ci.yml/badge.svg)](https://github.com/MagmaMoose/draventis/actions/workflows/ci.yml)
-[![Docs](https://img.shields.io/badge/docs-draventis-3f51b5)](https://magmamoose.github.io/draventis/)
+[![Docs](https://img.shields.io/badge/docs-draventis-3f51b5)](https://docs.magmamoose.com/draventis/)
 [![License](https://img.shields.io/github/license/MagmaMoose/draventis)](LICENSE)
 
 > **Scheduled DAST for Kubernetes, with the results in DefectDojo.**
@@ -21,7 +21,7 @@ run. They talk through the chart's rendered config; neither imports the other.
 > **`policy: full` sends active attacks. Never point it at production.** `baseline` is
 > passive and production-safe; `full` and `api` actively attack the target and belong on
 > staging only. Nothing stops you setting it wrong, so set it deliberately —
-> see [Configuration](https://magmamoose.github.io/draventis/configuration/).
+> see [Configuration](https://docs.magmamoose.com/draventis/configuration/).
 
 ## Run it
 
@@ -36,16 +36,16 @@ helm install draventis ./charts/draventis \
 ```
 
 Point it at your URLs and it does the rest. For a values file, authenticated scanning,
-or running a scan locally, see [Setup](https://magmamoose.github.io/draventis/setup/).
+or running a scan locally, see [Setup](https://docs.magmamoose.com/draventis/setup/).
 
 ## Documentation
 
 | | |
 | --- | --- |
-| [Setup](https://magmamoose.github.io/draventis/setup/) | Install, run a scan locally, authenticated scanning |
-| [Configuration](https://magmamoose.github.io/draventis/configuration/) | Targets, scan policies, schedules, every value |
-| [Deployment](https://magmamoose.github.io/draventis/deployment/) | Running it in a cluster |
-| [Architecture](https://magmamoose.github.io/draventis/architecture/) · [Design](https://magmamoose.github.io/draventis/design/) | How it works, and why it is shaped this way |
+| [Setup](https://docs.magmamoose.com/draventis/setup/) | Install, run a scan locally, authenticated scanning |
+| [Configuration](https://docs.magmamoose.com/draventis/configuration/) | Targets, scan policies, schedules, every value |
+| [Deployment](https://docs.magmamoose.com/draventis/deployment/) | Running it in a cluster |
+| [Architecture](https://docs.magmamoose.com/draventis/architecture/) · [Design](https://docs.magmamoose.com/draventis/design/) | How it works, and why it is shaped this way |
 
 ## Status
 
