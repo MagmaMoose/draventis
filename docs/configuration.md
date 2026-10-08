@@ -20,6 +20,7 @@ defectdojo:                   # the reimport sink (enabled by presence of `url`)
   url: https://defectdojo.example.com
   product_type: MyOrg         # optional grouping in DefectDojo
   engagement_prefix: "DAST - "
+  token_env: DEFECTDOJO_TOKEN # env var holding the API token (optional; default shown)
   auto_create_context: true   # DefectDojo creates product/engagement/test
   close_old_findings: true    # fixed alerts auto-mitigate per engagement
   tags: [dast]
@@ -85,7 +86,7 @@ from these values:
 | Chart value | `targets.yaml` |
 |---|---|
 | `defaults` | `defaults:` |
-| `defectDojo.url` / `.productType` / `.engagementPrefix` / `.autoCreateContext` / `.closeOldFindings` / `.tags` | `defectdojo:` |
+| `defectDojo.url` / `.productType` / `.engagementPrefix` / `.tokenEnv` / `.autoCreateContext` / `.closeOldFindings` / `.tags` | `defectdojo:` |
 | `nuclei.enabled` | `nuclei.enabled` |
 | `targets` | `targets:` |
 
