@@ -55,7 +55,9 @@ targets:
 | `openapi` | - | Spec URL; seeds the `api` (ZAP) scan. |
 | `tags` | `defaults.tags` | Extra DefectDojo tags. |
 | `auth.type` | `none` | `browser-oidc` is accepted, but the shipped AF plans don't yet drive it. See the note below. |
+| `auth.login_url` | - | URL of the login page; exported as `DRAVENTIS_LOGIN_URL` for the ZAP plan. Required when `type` is `browser-oidc`. |
 | `auth.user_env` / `auth.pass_env` | `ZAP_USER` / `ZAP_PASS` | Env vars the creds are read from. |
+| `auth.verify_url` | - | Optional URL ZAP polls to confirm the session is still authenticated. |
 
 !!! note "Authenticated scanning is not fully wired yet"
     draventis parses `auth` and exports `DRAVENTIS_LOGIN_URL` / the credential env
