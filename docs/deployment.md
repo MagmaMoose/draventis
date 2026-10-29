@@ -124,7 +124,9 @@ GitOps controller.
 ## Operational notes
 
 - `concurrencyPolicy: Forbid` + `activeDeadlineSeconds` stop a hung scan from
-  piling up or running forever.
+  piling up or running forever. `startingDeadlineSeconds: 300` (the default)
+  prevents the Kubernetes CronJob controller from locking up when a controller
+  outage causes more than 100 missed starts.
 - Heavy active scans can be pinned to specific nodes via `nodeSelector` /
   `tolerations` / `affinity`.
 - An upload failure never fails the scan. Check CronJob logs for

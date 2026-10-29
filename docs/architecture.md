@@ -55,7 +55,8 @@ draventis run [--all | --target NAME] [--schedule nightly|weekly]
 ```
 
 Exit codes: `0` all selected targets attempted OK, `1` at least one scan failed
-to produce a report, `2` bad arguments or config.
+to produce a report, `2` bad arguments, config error, or no targets matched the
+selection.
 
 The CronJobs run `draventis run --schedule <name>`, so each schedule scans only
 its own targets.
@@ -65,8 +66,15 @@ its own targets.
 One ZAP Automation Framework plan per policy. Each ends in a `report` job that
 writes the traditional XML DefectDojo's `ZAP Scan` parser ingests. The target
 URL (and, for authenticated plans, the login URL and credentials) is substituted
-from the environment at plan-load time (`${DRAVENTIS_TARGET_URL}`, `${ZAP_USER}`,
-…).
+from the environment at plan-load time. The variables exported per scan are:
+
+| Variable | Always set? | Value |
+|---|---|---|
+| `DRAVENTIS_TARGET_URL` | yes | `target.url` |
+| `DRAVENTIS_TARGET_SCOPE_REGEX` | yes | `re.escape(url) + ".*"` — use in `includePaths` to avoid wildcard scope-widening |
+| `DRAVENTIS_OPENAPI_URL` | only when `openapi` is set | `target.openapi` |
+| `DRAVENTIS_LOGIN_URL` | only when `auth.login_url` is set | `target.auth.login_url` |
+| `ZAP_USER` / `ZAP_PASS` | passed through from the container env | mounted from the Secret |
 
 ## The chart (`charts/draventis/`)
 
