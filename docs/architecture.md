@@ -71,7 +71,7 @@ from the environment at plan-load time. The variables exported per scan are:
 | Variable | Always set? | Value |
 |---|---|---|
 | `DRAVENTIS_TARGET_URL` | yes | `target.url` |
-| `DRAVENTIS_TARGET_SCOPE_REGEX` | yes | `re.escape(url) + ".*"` — use in `includePaths` to avoid wildcard scope-widening |
+| `DRAVENTIS_TARGET_SCOPE_REGEX` | yes | `re.escape(url) + ".*"`, used in `includePaths` to avoid wildcard scope-widening |
 | `DRAVENTIS_OPENAPI_URL` | only when `openapi` is set | `target.openapi` |
 | `DRAVENTIS_LOGIN_URL` | only when `auth.login_url` is set | `target.auth.login_url` |
 | `ZAP_USER` / `ZAP_PASS` | passed through from the container env | mounted from the Secret |

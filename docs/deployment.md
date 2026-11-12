@@ -84,15 +84,15 @@ externalSecret:
     name: cluster-secret-store
     kind: ClusterSecretStore
   data:
-    - secretKey: DEFECTDOJO_TOKEN
+    - secretKey: DOJO_TOKEN      # maps to DEFECTDOJO_TOKEN env var
       remoteRef:
-        key: draventis-defectdojo-token
-    - secretKey: ZAP_USER
+        key: vault/dojo/token
+    - secretKey: SCAN_USER       # maps to ZAP_USER env var
       remoteRef:
-        key: draventis-scan-user
-    - secretKey: ZAP_PASS
+        key: vault/scan/user
+    - secretKey: SCAN_PASS       # maps to ZAP_PASS env var
       remoteRef:
-        key: draventis-scan-pass
+        key: vault/scan/pass
 ```
 
 When `externalSecret.enabled=true` the chart emits an `ExternalSecret` (named the
