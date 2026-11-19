@@ -1,5 +1,7 @@
 # Deployment
 
+<!-- sources: charts/draventis/values.yaml, charts/draventis/templates/ -->
+
 draventis installs on any Kubernetes cluster with Helm. It has no hard dependency
 on any particular secret store, ingress, or GitOps tool.
 
