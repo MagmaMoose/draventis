@@ -1,5 +1,7 @@
 # Design
 
+<!-- sources: src/draventis/, automation/, charts/draventis/ -->
+
 Why draventis is shaped the way it is. This is the reasoning behind the code, not
 a how-to (see [Deployment](deployment.md) and [Configuration](configuration.md)
 for that).

@@ -1,5 +1,7 @@
 # Architecture
 
+<!-- sources: src/draventis/__main__.py, src/draventis/model.py, src/draventis/config.py, src/draventis/zap.py, src/draventis/nuclei.py, src/draventis/defectdojo.py, charts/draventis/ -->
+
 draventis is a small Python CLI plus a Helm chart. The CLI is the
 **orchestrator + uploader**; the scanning is done by external binaries (ZAP,
 Nuclei) that live in the container image.
@@ -49,17 +51,26 @@ not stop the rest.
 ## The CLI
 
 ```text
-draventis run [--all | --target NAME] [--schedule nightly|weekly]
-             [--config PATH] [--plans-dir DIR] [--workdir DIR]
-             [--no-nuclei] [--dry-run]
+draventis [--version] run [--all | --target NAME] [--schedule nightly|weekly]
+                          [--config PATH] [--plans-dir DIR] [--workdir DIR]
+                          [--no-nuclei] [--dry-run]
 ```
 
-Exit codes: `0` all selected targets attempted OK, `1` at least one scan failed
-to produce a report, `2` bad arguments, config error, or no targets matched the
-selection.
+| Flag | Purpose |
+|---|---|
+| `--version` | Show draventis version and exit. |
+| `--all` | Scan all targets. |
+| `--target NAME` | Scan one target by name. |
+| `--schedule nightly\|weekly` | Scan only targets on this schedule. |
+| `--config PATH` | Path to `targets.yaml` (default: `targets.yaml`). |
+| `--plans-dir DIR` | Directory of ZAP AF plans (default: `automation`). |
+| `--workdir DIR` | Scan output directory (default: `/zap/wrk`). |
+| `--no-nuclei` | Skip Nuclei even if enabled in config. |
+| `--dry-run` | Print what would run without executing. |
 
-The CronJobs run `draventis run --schedule <name>`, so each schedule scans only
-its own targets.
+You must provide at least one of `--all`, `--target NAME`, or `--schedule`. Exit codes: `0` all selected targets attempted OK, `1` at least one scan failed to produce a report, `2` bad arguments, config error, or no targets matched the selection.
+
+The CronJobs run `draventis run --schedule <name>`, so each schedule scans only its own targets.
 
 ## Automation plans (`automation/`)
 

@@ -1,5 +1,7 @@
 # Configuration
 
+<!-- sources: src/draventis/model.py, src/draventis/config.py, charts/draventis/values.yaml -->
+
 There are two layers:
 
 1. **`targets.yaml`**: what draventis itself reads (the scan config). In a
